@@ -21,41 +21,35 @@
 #include "TLatex.h"
 #include "TString.h"
 #include "TCut.h"
-#include "TNtuple.h"
-#include "TLine.h"  
-#include "ntupler/trackTree.C"
+#include "TNtuple.h" 
+#include "TLine.h" 
+#include "ntupler/ppTrack.C"
 
-void ntupler_data(double ptmin_trk=0.5,double ptmax_trk=300){ 
+void ntupler_pp(double ptmin_trk=0.5,double ptmax_trk=300){ 
  TH1D::SetDefaultSumw2();
 
- TString algo="akVs3Calo"; 
+ TString algo="ak3Calo"; 
  //input file  
  cout<<"ptmin= "<<ptmin_trk<<" ptmax= "<<ptmax_trk<<endl;
- // TString directory="root://eoscms//eos/cms/store/group/phys_heavyions/dgulhan/HIData/Jet80/";
- // TString infname="hiForest_Jet80or95_GR_R_53_LV6_02Mar2014_1300CET_Track8_Jet15"; 
+ TString directory="root://eoscms//eos/cms/store/caf/user/yjlee//pp2013/promptReco/";
+ TString infname="PP2013_HiForest_PromptReco_JsonPP_Jet80_PPReco_forestv82"; 
     
- TString directory="/d100/JetSample";
- TString infname="hiForest_Jet80or95_GR_R_53_LV6_12Mar2014_0000CET_Track8_Jet21_0"; 
-    
- trackTree * ftrk = new trackTree(Form("%s/%s.root",directory.Data(),infname.Data()));
+ ppTrack * ftrk = new ppTrack(Form("%s/%s.root",directory.Data(),infname.Data()));
  HiTree * fhi = new HiTree(Form("%s/%s.root",directory.Data(),infname.Data()));
+ HltTree_pp * fhlt = new HltTree_pp(Form("%s/%s.root",directory.Data(),infname.Data()));
+ skimTree_pp * fskim = new skimTree_pp(Form("%s/%s.root",directory.Data(),infname.Data()));
  t * fjet = new t(Form("%s/%s.root",directory.Data(),infname.Data()),algo);
- skimTree * fskim = new skimTree(Form("%s/%s.root",directory.Data(),infname.Data()));
- 
  //getting unfolding profile 
  TFile * f_unfold=new TFile("binbybin_pt.root");
- TH1D *hweight = (TH1D*)f_unfold->Get("hweight");
+ TH1D *hweight = (TH1D*)f_unfold->Get("hweight"); 
  TH1D *h_res = (TH1D*)f_unfold->Get("h_res");
  TF1 * fgaus=new TF1("fgaus","gaus(0)",-20,20);
  fgaus->SetParameters(1,0,1);
   
  //pt bins for track efficiency correction
- int npt=14; 
- double ptmin[]={0.4,0.4,0.4,0.4,0.4, 1, 1, 1,  1,  1, 3, 3,  3,  8};
- double ptmax[]={  1,  1,  1,  1,  1, 3, 3, 3,  3,  3, 8, 8,  8,300};
- 
- int cent_min[]={  0, 20, 40, 60,100, 0,20,40, 60,100, 0,20, 40,  0};
- int cent_max[]={ 20, 40, 60,100,200,20,40,60,100,200,20,40,200,200};
+ int npt=4; 
+ double ptmin[]={0.4, 1, 3,   8};
+ double ptmax[]={  1, 3,  8,300};
  
 
  double frac[]={0,0.01,0.02,0.03,0.04,0.05,0.075,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.55,0.6,0.65,0.7,0.75,0.8,0.85,0.9,0.925,0.95,0.96,0.97,0.98,0.99,1.01};
@@ -64,45 +58,36 @@ void ntupler_data(double ptmin_trk=0.5,double ptmax_trk=300){
 
  //getting histograms for track efficiency correction 
  TFile *f_eff[npt];
- TProfile *p_eff_cent[npt]; 
  TProfile2D *p_eff_accept[npt]; 
  TProfile *p_eff_pt[npt]; 
  TProfile *p_eff_rmin[npt]; 
  for(int ipt=0; ipt<npt;ipt++){
-   if(ipt<13)f_eff[ipt]= new TFile(Form("/afs/cern.ch/user/d/dgulhan/workDir/trackCorrection/akVs3Calo/eff/eff_pt%d_%d_cent%d_%d_step_cent4accept4pt4rmin3.root",(int)ptmin[ipt],(int)ptmax[ipt],(int)(0.5*cent_min[ipt]),(int)(0.5*cent_max[ipt])));
-   else f_eff[ipt]= new TFile(Form("/afs/cern.ch/user/d/dgulhan/workDir/trackCorrection/akVs3Calo/eff/eff_pt%d_%d_cent%d_%d_step_cent3accept3pt3rmin3.root",(int)ptmin[ipt],(int)ptmax[ipt],(int)(0.5*cent_min[ipt]),(int)(0.5*cent_max[ipt])));
-   p_eff_cent[ipt]=(TProfile*)f_eff[ipt]->Get("p_eff_cent");
+   if(ipt<npt-1)f_eff[ipt]= new TFile(Form("/afs/cern.ch/user/d/dgulhan/workDir/trackEfficiency/final_hists_%s/eff_pt%d_%d_accept4pt4rmin3_%s_dogenjet0.root",algo.Data(),(int)ptmin[ipt],(int)ptmax[ipt],algo.Data()));
+   else f_eff[ipt]= new TFile(Form("/afs/cern.ch/user/d/dgulhan/workDir/trackEfficiency/final_hists_%s/eff_pt%d_%d_accept3pt3rmin3_%s_dogenjet0.root",algo.Data(),(int)ptmin[ipt],(int)ptmax[ipt],algo.Data()));
    p_eff_pt[ipt]=(TProfile*)f_eff[ipt]->Get("p_eff_pt");
    p_eff_accept[ipt]=(TProfile2D*)f_eff[ipt]->Get("p_eff_acceptance");
    p_eff_rmin[ipt]=(TProfile*)f_eff[ipt]->Get("p_eff_rmin");
  }
-
  TFile *f_fake[npt];
- TProfile *p_fake_cent[npt]; 
  TProfile2D *p_fake_accept[npt]; 
- TProfile *p_fake_pt[npt]; 
+ TProfile *p_fake_pt[npt];  
  TProfile *p_fake_rmin[npt]; 
  for(int ipt=0; ipt<npt;ipt++){
-   // if(ipt==0)f_fake[ipt]= new TFile(Form("/afs/cern.ch/work/d/dgulhan/trackFake/final_hists_akVs3Calo/fake_pt%d_%d_cent%d_%d_step_cent4accept4pt4rmin3_%s_dogenjet0.root",(int)ptmin[ipt],(int)ptmax[ipt],cent_min[ipt],cent_max[ipt],algo.Data()));
-   if(ipt<4)f_fake[ipt]= new TFile(Form("/afs/cern.ch/user/d/dgulhan/workDir/trackFake/final_hists_akVs3Calo_20140312/fake_pt%d_%d_cent%d_%d_step_cent5accept5pt5rmin4_%s_dogenjet0.root",(int)ptmin[ipt],(int)ptmax[ipt],cent_min[ipt],cent_max[ipt],algo.Data()));
-   else if(ipt<13)f_fake[ipt]= new TFile(Form("/afs/cern.ch/user/d/dgulhan/workDir/trackFake/final_hists_akVs3Calo_20140312/fake_pt%d_%d_cent%d_%d_step_cent4accept4pt4rmin3_%s_dogenjet0.root",(int)ptmin[ipt],(int)ptmax[ipt],cent_min[ipt],cent_max[ipt],algo.Data()));
-   else f_fake[ipt]= new TFile(Form("/afs/cern.ch/user/d/dgulhan/workDir/trackFake/final_hists_akVs3Calo_20140312/fake_pt%d_%d_cent%d_%d_step_cent3accept3pt3rmin3_%s_dogenjet0.root",(int)ptmin[ipt],(int)ptmax[ipt],cent_min[ipt],cent_max[ipt],algo.Data()));
-   p_fake_cent[ipt]=(TProfile*)f_fake[ipt]->Get("p_fake_cent");
+   f_fake[ipt]= new TFile(Form("/afs/cern.ch/user/d/dgulhan/workDir/trackFake_pp/final_hists_%s/fake_pt%d_%d_step_accept5pt5rmin4_%s_dogenjet0.root",algo.Data(),(int)ptmin[ipt],(int)ptmax[ipt],algo.Data()));
    p_fake_pt[ipt]=(TProfile*)f_fake[ipt]->Get("p_fake_pt");
    p_fake_accept[ipt]=(TProfile2D*)f_fake[ipt]->Get("p_fake_acceptance");
    p_fake_rmin[ipt]=(TProfile*)f_fake[ipt]->Get("p_fake_rmin");
  }
- 
  //output file and tree
  // TFile *outf= new TFile(Form("track_ntuple_%s_jetscut_trackercut_jetframe_v2_pt%d_%d_nogenptcut.root",infname.Data(),(int)ptmin_trk,(int)ptmax_trk),"recreate");
- TFile *outf= new TFile(Form("ntuples_data_20140314/full_ntuple_HiForest_PbPb_Jet80_Track8_Jet17_GR_R_53_LV6_merged_forest_0_pt%d_%d_%s.root",(int)ptmin_trk,(int)ptmax_trk,algo.Data()),"recreate");
+ TFile *outf= new TFile(Form("ntuples_data_pp/hastracks_full_ntuple_HiForest_PP2013_HiForest_PromptReco_JsonPP_Jet80_PPReco_forestv82_pt%d_%d_%s.root",(int)ptmin_trk,(int)ptmax_trk,algo.Data()),"recreate");
  
- std::string trackVars=" trackselect:eff:fake:trkfake:weight_unfold:pt:eta:phi:rmin:cent:pt_boosted:p_boosted:eta_boosted:phi_boosted:cent:pt1:eta1:phi1:pt1_boosted:eta1_boosted:phi1_boosted:pt2:eta2:phi2:pt2_boosted:eta2_boosted:phi2_boosted:pt3:eta3:phi3:pt3_boosted:eta3_boosted:phi3_boosted:dphi:ptratio:jetspz:jetspt:jetseta:jetsrap:jetspz_12:jetspt_12:jetsrap_12:alpha:alpha_boosted:mpt_track:mpt_boosted_track:hfp:hfm";
+ std::string trackVars="trackselect:eff:fake:trkfake:weight_unfold:pt:eta:phi:rmin:pt_boosted:p_boosted:eta_boosted:phi_boosted:pt1:eta1:phi1:pt1_boosted:eta1_boosted:phi1_boosted:pt2:eta2:phi2:pt2_boosted:eta2_boosted:phi2_boosted:pt3:eta3:phi3:pt3_boosted:eta3_boosted:phi3_boosted:dphi:ptratio:jetspz:jetspt:jetseta:jetsrap:jetspz_12:jetspt_12:jetsrap_12:alpha:alpha_boosted:mpt_track:mpt_boosted_track:hfp:hfm:vz";
  
 
  TNtuple *nt_track = new TNtuple("nt_track","",trackVars.data()); 
  
- std:string jetVars="cent:pt1:eta1:phi1:pt1_boosted:eta1_boosted:phi1_boosted:pt2:eta2:phi2:pt2_boosted:eta2_boosted:phi2_boosted:pt3:eta3:phi3:pt3_boosted:eta3_boosted:phi3_boosted:dphi:ptratio:jetspz:jetspt:jetseta:jetsrap:jetsphi:jetspz_12:jetspt_12:jetseta_12:jetsrap_12:jetsphi_12:trkrap:mpt_tracks:mpt_boosted_tracks:mp_tracks:mp_boosted_tracks:mpt_tracks_uncorr:mpt_boosted_tracks_uncorr:mp_tracks_uncorr:mp_boosted_tracks_uncorr:hfp:hfm";
+ std:string jetVars="pt1:eta1:phi1:pt1_boosted:eta1_boosted:phi1_boosted:pt2:eta2:phi2:pt2_boosted:eta2_boosted:phi2_boosted:pt3:eta3:phi3:pt3_boosted:eta3_boosted:phi3_boosted:dphi:ptratio:jetspz:jetspt:jetseta:jetsrap:jetsphi:jetspz_12:jetspt_12:jetseta_12:jetsrap_12:jetsphi_12:trkrap:mpt_tracks:mpt_boosted_tracks:mp_tracks:mp_boosted_tracks:mpt_tracks_uncorr:mpt_boosted_tracks_uncorr:mp_tracks_uncorr:mp_boosted_tracks_uncorr:hfp:hfm:vz";
  
  TNtuple *nt_jet = new TNtuple("nt_jet","",jetVars.data());
 
@@ -137,17 +122,17 @@ void ntupler_data(double ptmin_trk=0.5,double ptmax_trk=300){
  for(int jentry=0;jentry<nentries;jentry++){
  // for(int jentry=0;jentry<100;jentry++){
   if((jentry%1000)==0) std::cout<<jentry<<"/"<<nentries<<std::endl;
+
   ftrk->GetEntry(jentry);
   fhi->GetEntry(jentry);
   fskim->GetEntry(jentry);
   fjet->GetEntry(jentry);
   //fgen->GetEntry(jentry);
-   if(!(fskim->pcollisionEventSelection && fskim->pHBHENoiseFilter)) continue;
-
- 
-  float cent=fhi->hiBin;
+  if(!(fskim->pPAcollisionEventSelectionPA && fskim->pHBHENoiseFilter))continue;
+  
   float hfp = fhi->hiHFplusEta4;
   float hfm = fhi->hiHFminusEta4;
+  float vz = fhi->vz;
   float pt1=-99;
   float phi1=-99;
   float eta1=-99;
@@ -340,12 +325,12 @@ void ntupler_data(double ptmin_trk=0.5,double ptmax_trk=300){
    float phi=ftrk->trkPhi[itrk];
    
    float trkfake=ftrk->trkFake[itrk];
-   float eff_pt,eff_cent,eff_accept,eff_rmin;
-   eff_pt=eff_cent=eff_accept=eff_rmin=1;
-   float fake_pt,fake_cent,fake_accept,fake_rmin;
-   fake_pt=fake_cent=fake_accept=fake_rmin=0;
+   float eff_pt,eff_accept,eff_rmin;
+   eff_pt=eff_accept=eff_rmin=1;
+   float fake_pt,fake_accept,fake_rmin;
+   fake_pt=fake_accept=fake_rmin=0;
    if(pt<ptmin_trk || pt>ptmax_trk) continue; 
-   if(fabs(eta)>2.4) continue;
+   if(abs(eta)>2.4) continue;
    float trackselect=(ftrk->highPurity[itrk] && fabs(ftrk->trkDxy1[itrk]/ftrk->trkDxyError1[itrk])<3.0 && fabs(ftrk->trkDz1[itrk]/ftrk->trkDzError1[itrk])<3 && (ftrk->trkPtError[itrk]/ftrk->trkPt[itrk])<0.1);
    
    float weight_unfold=hweight->GetBinContent(hweight->FindBin(pt));
@@ -360,31 +345,29 @@ void ntupler_data(double ptmin_trk=0.5,double ptmax_trk=300){
    }
    
    for(int ipt=0;ipt<npt;ipt++){
-    if(pt>=ptmin[ipt] && pt<ptmax[ipt] && cent>=cent_min[ipt] && cent<cent_max[ipt]){
+    if(pt>=ptmin[ipt] && pt<ptmax[ipt]){
       eff_pt=p_eff_pt[ipt]->GetBinContent(p_eff_pt[ipt]->FindBin(pt));
-      eff_cent=p_eff_cent[ipt]->GetBinContent(p_eff_cent[ipt]->FindBin(cent));
       eff_accept=p_eff_accept[ipt]->GetBinContent(p_eff_accept[ipt]->GetXaxis()->FindBin(phi),p_eff_accept[ipt]->GetYaxis()->FindBin(eta));
       if(rmin<5)eff_rmin=p_eff_rmin[ipt]->GetBinContent(p_eff_rmin[ipt]->FindBin(rmin));
      }     
    } 
    
    for(int ipt=0;ipt<npt;ipt++){
-    if(pt>=ptmin[ipt] && pt<ptmax[ipt] && cent>=cent_min[ipt] && cent<cent_max[ipt]){
+    if(pt>=ptmin[ipt] && pt<ptmax[ipt]){
       fake_pt=p_fake_pt[ipt]->GetBinContent(p_fake_pt[ipt]->FindBin(pt));
-      fake_cent=p_fake_cent[ipt]->GetBinContent(p_fake_cent[ipt]->FindBin(cent));
       fake_accept=p_fake_accept[ipt]->GetBinContent(p_fake_accept[ipt]->GetXaxis()->FindBin(phi),p_fake_accept[ipt]->GetYaxis()->FindBin(eta));
       if(rmin<5) fake_rmin=p_fake_rmin[ipt]->GetBinContent(p_fake_rmin[ipt]->FindBin(rmin));
      }     
    }
   
    float eff=1;
-   eff=eff_accept*eff_cent*eff_pt*eff_rmin;
+   eff=eff_accept*eff_pt*eff_rmin;
    if(eff==0){
     if(pt>100)eff=0.8;
 	else eff=1;
    }
    float fake=0;
-   if(pt<100)fake=fake_accept+fake_cent+fake_pt+fake_rmin;
+   if(pt<100)fake=fake_accept+fake_pt+fake_rmin;
    
    TLorentzVector vp;
    vp.SetPtEtaPhiM(pt,eta,phi,0.13957018);
@@ -423,10 +406,10 @@ void ntupler_data(double ptmin_trk=0.5,double ptmax_trk=300){
     mp_boosted_tracks+=vp_boosted.P()*cos(alpha_boosted);
 	  
 	  
-    float entry[]={trackselect,eff,fake,trkfake,weight_unfold,pt,eta,phi,rmin,cent,pt_boosted,p_boosted,eta_boosted,phi_boosted,cent,pt1,eta1,phi1,pt1_boosted,eta1_boosted,phi1_boosted,pt2,eta2,phi2,pt2_boosted,eta2_boosted,phi2_boosted,pt3,eta3,phi3,pt3_boosted,eta3_boosted,phi3_boosted,dphi,ptratio,jetspz,jetspt,jetseta,jetsrap,jetspz_12,jetspt_12,jetsrap_12,alpha,alpha_boosted,mpt_track,mpt_boosted_track,hfp,hfm};
-    // nt_track->Fill(entry);
+    float entry[]={trackselect,eff,fake,trkfake,weight_unfold,pt,eta,phi,rmin,pt_boosted,p_boosted,eta_boosted,phi_boosted,pt1,eta1,phi1,pt1_boosted,eta1_boosted,phi1_boosted,pt2,eta2,phi2,pt2_boosted,eta2_boosted,phi2_boosted,pt3,eta3,phi3,pt3_boosted,eta3_boosted,phi3_boosted,dphi,ptratio,jetspz,jetspt,jetseta,jetsrap,jetspz_12,jetspt_12,jetsrap_12,alpha,alpha_boosted,mpt_track,mpt_boosted_track,hfp,hfm,vz};
+    nt_track->Fill(entry);
 
-    if(!trackselect) continue;
+    if(!(trackselect)) continue;
 
     double mpt_alpha_t[30];
     double mpt_alpha_boosted_t[30];
@@ -441,21 +424,21 @@ void ntupler_data(double ptmin_trk=0.5,double ptmax_trk=300){
    for(int i=0;i<30;i++){
       mpt_alpha_t[i]=0;
       mpt_alpha_boosted_t[i]=0;
-	    if(alpha <(frac[i+1]*TMath::Pi()) && alpha >=(frac[i]*TMath::Pi())) mpt_alpha_t[i] =pt*cos(phi -phi1);
+	  if(alpha <(frac[i+1]*TMath::Pi()) && alpha >=(frac[i]*TMath::Pi())) mpt_alpha_t[i] =pt*cos(phi -phi1);
       mpt_alpha_tracks[i]+=((1-fake)/eff)*mpt_alpha_t[i];
       mpt_alpha_tracks_uncorr[i]+=mpt_alpha_t[i];
-	    if(alpha_boosted <(frac[i+1]*TMath::Pi()) && alpha_boosted >=(frac[i-1]*TMath::Pi())) mpt_alpha_boosted_t[i] =pt *cos(phi -phi1);
+	  if(alpha_boosted <(frac[i+1]*TMath::Pi()) && alpha_boosted >=(frac[i-1]*TMath::Pi())) mpt_alpha_boosted_t[i] =pt *cos(phi -phi1);
       mpt_alpha_boosted_tracks[i]+=((1-fake)/eff)*mpt_alpha_boosted_t[i];
       mpt_alpha_boosted_tracks_uncorr[i]+=mpt_alpha_boosted_t[i];
     
-       mp_alpha_t[i]=0;
-       mp_alpha_boosted_t[i]=0;
-	     if(alpha <(frac[i+1]*TMath::Pi()) && alpha >=(frac[i]*TMath::Pi())) mp_alpha_t[i] =vp.P()*cos(alpha);
-       mp_alpha_tracks[i]+=((1-fake)/eff)*mp_alpha_t[i];
-       mp_alpha_tracks_uncorr[i]+=mp_alpha_t[i];
-	     if(alpha_boosted <(frac[i+1]*TMath::Pi()) && alpha_boosted >=(frac[i]*TMath::Pi())) mp_alpha_boosted_t[i] =vp_boosted.P()*cos(alpha_boosted);
-       mp_alpha_boosted_tracks[i]+=((1-fake)/eff)*mp_alpha_boosted_t[i];
-       mp_alpha_boosted_tracks_uncorr[i]+=mp_alpha_boosted_t[i];
+      mp_alpha_t[i]=0;
+      mp_alpha_boosted_t[i]=0;
+	  if(alpha <(frac[i+1]*TMath::Pi()) && alpha >=(frac[i]*TMath::Pi())) mp_alpha_t[i] =vp.P()*cos(alpha);
+      mp_alpha_tracks[i]+=((1-fake)/eff)*mp_alpha_t[i];
+      mp_alpha_tracks_uncorr[i]+=mp_alpha_t[i];
+	  if(alpha_boosted <(frac[i+1]*TMath::Pi()) && alpha_boosted >=(frac[i]*TMath::Pi())) mp_alpha_boosted_t[i] =vp_boosted.P()*cos(alpha_boosted);
+      mp_alpha_boosted_tracks[i]+=((1-fake)/eff)*mp_alpha_boosted_t[i];
+      mp_alpha_boosted_tracks_uncorr[i]+=mp_alpha_boosted_t[i];
 	}
 	
       for(int i=0;i<30;i++){
@@ -508,7 +491,7 @@ void ntupler_data(double ptmin_trk=0.5,double ptmax_trk=300){
   nt_mp_tracks_uncorr_dR->Fill(mp_dR_tracks_uncorr);
   nt_mp_boosted_tracks_uncorr_dR->Fill(mp_dR_boosted_tracks_uncorr);
  
-  float jtentry[]={cent,pt1,eta1,phi1,pt1_boosted,eta1_boosted,phi1_boosted,pt2,eta2,phi2,pt2_boosted,eta2_boosted,phi2_boosted,pt3,eta3,phi3,pt3_boosted,eta3_boosted,phi3_boosted,dphi,ptratio,jetspz,jetspt,jetseta,jetsrap,jetsphi,jetspz_12,jetspt_12,jetseta_12,jetsrap_12,jetsphi_12,trkrap,mpt_tracks,mpt_boosted_tracks,mp_tracks,mp_boosted_tracks,mpt_tracks_uncorr,mpt_boosted_tracks_uncorr,mp_tracks_uncorr,mp_boosted_tracks_uncorr,hfp,hfm};
+  float jtentry[]={pt1,eta1,phi1,pt1_boosted,eta1_boosted,phi1_boosted,pt2,eta2,phi2,pt2_boosted,eta2_boosted,phi2_boosted,pt3,eta3,phi3,pt3_boosted,eta3_boosted,phi3_boosted,dphi,ptratio,jetspz,jetspt,jetseta,jetsrap,jetsphi,jetspz_12,jetspt_12,jetseta_12,jetsrap_12,jetsphi_12,trkrap,mpt_tracks,mpt_boosted_tracks,mp_tracks,mp_boosted_tracks,mpt_tracks_uncorr,mpt_boosted_tracks_uncorr,mp_tracks_uncorr,mp_boosted_tracks_uncorr,hfp,hfm,vz};
   
   nt_jet->Fill(jtentry);
  }
@@ -516,7 +499,7 @@ void ntupler_data(double ptmin_trk=0.5,double ptmax_trk=300){
 
  
  outf->cd();
- // nt_track->Write();
+ nt_track->Write();
  nt_jet->Write();
 
  nt_mpt_tracks->Write();

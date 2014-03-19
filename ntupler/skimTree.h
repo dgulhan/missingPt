@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Wed Nov 27 10:34:32 2013 by ROOT version 5.32/00
+// Thu Mar 13 14:37:22 2014 by ROOT version 5.32/00
 // from TTree HltTree/
-// found on file: /mnt/hadoop/cms/store/user/yenjie/HiForest_v27/Dijet50_HydjetDrum_v27_mergedV1.root
+// found on file: root://eoscms//eos/cms/store/group/phys_heavyions/dgulhan/HiForest_Pythia_Hydjet_Jet80_Track8_Jet19_STARTHI53_LV1_merged_forest_0.root
 //////////////////////////////////////////////////////////
 
 #ifndef skimTree_h
@@ -22,34 +22,26 @@ public :
    Int_t           fCurrent; //!current Tree number in a TChain
 
    // Declaration of leaf types
-   Int_t           L1simulation_step;
-   Int_t           reco_extra;
-   Int_t           reco_extra_jet;
-   Int_t           gen_step;
-   Int_t           pat_step;
+   Int_t           photonStep;
    Int_t           extrapatstep;
    Int_t           ana_step;
    Int_t           phltJetHI;
    Int_t           pcollisionEventSelection;
    Int_t           pHBHENoiseFilter;
    Int_t           phiEcalRecHitSpikeFilter;
+   Int_t           hltAna;
 
    // List of branches
-   TBranch        *b_L1simulation_step;   //!
-   TBranch        *b_reco_extra;   //!
-   TBranch        *b_reco_extra_jet;   //!
-   TBranch        *b_gen_step;   //!
-   TBranch        *b_pat_step;   //!
+   TBranch        *b_photonStep;   //!
    TBranch        *b_extrapatstep;   //!
    TBranch        *b_ana_step;   //!
    TBranch        *b_phltJetHI;   //!
    TBranch        *b_pcollisionEventSelection;   //!
    TBranch        *b_pHBHENoiseFilter;   //!
    TBranch        *b_phiEcalRecHitSpikeFilter;   //!
+   TBranch        *b_hltAna;   //!
 
-   skimTree(TTree *tree=0);
    skimTree(TString infile,TTree *tree=0);
-
    virtual ~skimTree();
    virtual Int_t    Cut(Long64_t entry);
    virtual Int_t    GetEntry(Long64_t entry);
@@ -59,7 +51,6 @@ public :
    virtual Bool_t   Notify();
    virtual void     Show(Long64_t entry = -1);
    virtual void     Close();
-
    TFile *f;
 
 };
@@ -69,8 +60,8 @@ public :
 #ifdef skimTree_cxx
 skimTree::skimTree(TString infile,TTree *tree) 
 {
-      f = TFile::Open(infile.Data());
-      tree=(TTree*)f->Get("skimanalysis/HltTree");
+    f = TFile::Open(infile.Data());
+    tree=(TTree*)f->Get("skimanalysis/HltTree");
 	  Init(tree);
 	  // f->Close();
 }
@@ -116,17 +107,14 @@ void skimTree::Init(TTree *tree)
    fCurrent = -1;
    fChain->SetMakeClass(1);
 
-   fChain->SetBranchAddress("L1simulation_step", &L1simulation_step, &b_L1simulation_step);
-   fChain->SetBranchAddress("reco_extra", &reco_extra, &b_reco_extra);
-   fChain->SetBranchAddress("reco_extra_jet", &reco_extra_jet, &b_reco_extra_jet);
-   fChain->SetBranchAddress("gen_step", &gen_step, &b_gen_step);
-   fChain->SetBranchAddress("pat_step", &pat_step, &b_pat_step);
+   fChain->SetBranchAddress("photonStep", &photonStep, &b_photonStep);
    fChain->SetBranchAddress("extrapatstep", &extrapatstep, &b_extrapatstep);
    fChain->SetBranchAddress("ana_step", &ana_step, &b_ana_step);
    fChain->SetBranchAddress("phltJetHI", &phltJetHI, &b_phltJetHI);
    fChain->SetBranchAddress("pcollisionEventSelection", &pcollisionEventSelection, &b_pcollisionEventSelection);
    fChain->SetBranchAddress("pHBHENoiseFilter", &pHBHENoiseFilter, &b_pHBHENoiseFilter);
    fChain->SetBranchAddress("phiEcalRecHitSpikeFilter", &phiEcalRecHitSpikeFilter, &b_phiEcalRecHitSpikeFilter);
+   fChain->SetBranchAddress("hltAna", &hltAna, &b_hltAna);
    Notify();
 }
 
@@ -155,9 +143,7 @@ Int_t skimTree::Cut(Long64_t entry)
 // returns -1 otherwise.
    return 1;
 }
-
-void skimTree::Close()
-{
-f->Close();
+void skimTree::Close(){
+  f->Close();
 }
 #endif // #ifdef skimTree_cxx
