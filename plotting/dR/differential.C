@@ -33,7 +33,7 @@ void drawText(const char *text, float xp, float yp, int size=18){
   tex->Draw("same");
 }
 
-void integrated(int cent_min=0,int cent_max=20,int gensigbkgreco=3,double etadijet=2){
+void differential(int cent_min=0,int cent_max=20,int gensigbkgreco=3,double etadijet=2){
  TH1D::SetDefaultSumw2();
  int domp=0;
  bool doGenJet=false;
@@ -57,43 +57,43 @@ void integrated(int cent_min=0,int cent_max=20,int gensigbkgreco=3,double etadij
  TTree *t[npt];
  TTree *t_jet[npt]; 
  int nalpha=33;
- double mpt[npt][nalpha+1];
- double mpterr[npt][nalpha+1]; 
- double mptsum[nalpha+1];
- double mptsumpos[nalpha+1];
- double mptsumneg[nalpha+1];
- TH1D* h[npt][nalpha+1];
- TH1D *hsum[nalpha+1];
+ double mpt[npt][nalpha];
+ double mpterr[npt][nalpha]; 
+ double mptsum[nalpha];
+ double mptsumpos[nalpha];
+ double mptsumneg[nalpha];
+ TH1D* h[npt][nalpha];
+ TH1D *hsum[nalpha];
  TH1D * hmpt_vs_alpha[npt];
  
  TFile *f_ref[npt];
  TTree *t_ref[npt];
  TTree *t_jet_ref[npt]; 
- double mpt_ref[npt][nalpha+1];
- double mpterr_ref[npt][nalpha+1];
- double mptsum_ref[nalpha+1];
- double mptsumpos_ref[nalpha+1];
- double mptsumneg_ref[nalpha+1];
- TH1D* h_ref[npt][nalpha+1];
- TH1D *hsum_ref[nalpha+1];
+ double mpt_ref[npt][nalpha];
+ double mpterr_ref[npt][nalpha];
+ double mptsum_ref[nalpha];
+ double mptsumpos_ref[nalpha];
+ double mptsumneg_ref[nalpha];
+ TH1D* h_ref[npt][nalpha];
+ TH1D *hsum_ref[nalpha];
  TH1D * hmpt_vs_alpha_ref[npt];
  
- double mpt_diff[npt][nalpha+1];
- double mpterr_diff[npt][nalpha+1];
- double mptsum_diff[nalpha+1];
- double mptsumpos_diff[nalpha+1];
- double mptsumneg_diff[nalpha+1];
- TH1D *hsum_diff[nalpha+1];
+ double mpt_diff[npt][nalpha];
+ double mpterr_diff[npt][nalpha];
+ double mptsum_diff[nalpha];
+ double mptsumpos_diff[nalpha];
+ double mptsumneg_diff[nalpha];
+ TH1D *hsum_diff[nalpha];
  TH1D * hmpt_vs_alpha_diff[npt];
  
  // int col[]={kAzure-9,kYellow-9,kOrange+1,kGreen+3,kPink-2,kRed+1,1};
  int col[]={kRed+1,kGreen+3,kOrange+1,kYellow-9,kAzure-9,1};
- TString sintegrate[nalpha+1][npt];
+ TString sintegrate[nalpha][npt];
  TString s[npt];
  for(int ipt=0; ipt<npt;ipt++){
   s[ipt]="";
  }
- for(int ialpha=0;ialpha<nalpha+1;ialpha++){
+ for(int ialpha=0;ialpha<nalpha;ialpha++){
   mptsum[ialpha]=0;
   mptsumpos[ialpha]=0;
   mptsumneg[ialpha]=0;
@@ -141,18 +141,18 @@ void integrated(int cent_min=0,int cent_max=20,int gensigbkgreco=3,double etadij
   
       cout<<3.3<<endl;
 
-  hmpt_vs_alpha[ipt]= new TH1D(Form("hmpt_%d",ipt),"",nalpha+1,frac);
+  hmpt_vs_alpha[ipt]= new TH1D(Form("hmpt_%d",ipt),"",nalpha,frac);
     cout<<4<<endl;
 
   t_ref[ipt]=(TTree*)f_ref[ipt]->Get(Form("nt_%s%s_dR%s",smpt[domp].Data(),skind[gensigbkgreco].Data(),strave.Data()));
   t_jet_ref[ipt]=(TTree*)f_ref[ipt]->Get("nt_jet");
   t_ref[ipt]->AddFriend(t_jet_ref[ipt]);
-  hmpt_vs_alpha_ref[ipt]= new TH1D(Form("hmpt_ref_%d",ipt),"",nalpha+1,frac);
-  hmpt_vs_alpha_diff[ipt]= new TH1D(Form("hmpt_diff_%d",ipt),"",nalpha+1,frac);
+  hmpt_vs_alpha_ref[ipt]= new TH1D(Form("hmpt_ref_%d",ipt),"",nalpha,frac);
+  hmpt_vs_alpha_diff[ipt]= new TH1D(Form("hmpt_diff_%d",ipt),"",nalpha,frac);
       cout<<5<<endl;
 
-  for(int ialpha=0;ialpha<nalpha+1;ialpha++ ){
-   if(ialpha<nalpha)s[ipt]+=Form("-dR_%d",ialpha);
+  for(int ialpha=0;ialpha<nalpha;ialpha++ ){
+   if(ialpha<nalpha)s[ipt]=Form("-dR_%d",ialpha);
    // if(ialpha<nalpha)s[ipt]+=Form("-alpha_%d",ialpha);
    cout<<s[ipt].Data()<<endl;
    if(ialpha<nalpha)sintegrate[ialpha][ipt]=s[ipt];
@@ -240,16 +240,16 @@ void integrated(int cent_min=0,int cent_max=20,int gensigbkgreco=3,double etadij
  
  
  // cout<<"all events"<<endl;  
- for(int ialpha=0;ialpha<nalpha+1;ialpha++){
+ for(int ialpha=0;ialpha<nalpha;ialpha++){
   cout<<(mptsum[ialpha])<<" "<<mpt[npt-1][ialpha]<<endl;
   cout<<(mptsum_ref[ialpha])<<" "<<mpt_ref[npt-1][ialpha]<<endl;
  }
 
  TCanvas * c1 = new TCanvas("c1","",600,600);
- TH1D * empty=new TH1D("empty",";#DeltaR;<#slash{p}_{T}^{#parallel}> (GeV)",nalpha+1,frac);
+ TH1D * empty=new TH1D("empty",";#DeltaR;<#slash{p}_{T}^{#parallel}> (GeV)",nalpha,frac);
  empty->Fill(0.5,1000); 
- empty->SetMaximum(40); 
- empty->SetMinimum(-30); 
+ empty->SetMaximum(10); 
+ empty->SetMinimum(-10); 
  empty->Draw();
   
  for(int ipt=npt-2;ipt>=0;ipt--){ 
@@ -276,12 +276,12 @@ void integrated(int cent_min=0,int cent_max=20,int gensigbkgreco=3,double etadij
  drawText(Form("%s",spart[gensigbkgreco].Data()),0.44,0.81);
  drawText(Form("%d-%d %%",(int)(0.5*cent_min),(int)(0.5*cent_max)),0.22,0.93);
  if(!doMC){
-  c1->SaveAs(Form("plots_integrated_data/integrated_mpt_vs_alpha_%s%s_dijet%d_cent%d_%d_doAve%d_dR.png",smpt[domp].Data(),skind[gensigbkgreco].Data(),(int)etadijet,cent_min,cent_max,doAve));
-  c1->SaveAs(Form("plots_integrated_data/integrated_mpt_vs_alpha_%s%s_dijet%d_cent%d_%d_doAve%d_dR.pdf",smpt[domp].Data(),skind[gensigbkgreco].Data(),(int)etadijet,cent_min,cent_max,doAve));
+  c1->SaveAs(Form("plots_differential_data/differential_mpt_vs_alpha_%s%s_dijet%d_cent%d_%d_doAve%d_dR.png",smpt[domp].Data(),skind[gensigbkgreco].Data(),(int)etadijet,cent_min,cent_max,doAve));
+  c1->SaveAs(Form("plots_differential_data/differential_mpt_vs_alpha_%s%s_dijet%d_cent%d_%d_doAve%d_dR.pdf",smpt[domp].Data(),skind[gensigbkgreco].Data(),(int)etadijet,cent_min,cent_max,doAve));
  }
  if(doMC){
-  c1->SaveAs(Form("plots_integrated_mc%d/integrated_mpt_vs_alpha_%s%s_dijet%d_cent%d_%d_doAve%d_dR_MC.png",doGenJet,smpt[domp].Data(),skind[gensigbkgreco].Data(),(int)etadijet,cent_min,cent_max,doAve));
-  c1->SaveAs(Form("plots_integrated_mc%d/integrated_mpt_vs_alpha_%s%s_dijet%d_cent%d_%d_doAve%d_dR_MC.pdf",doGenJet,smpt[domp].Data(),skind[gensigbkgreco].Data(),(int)etadijet,cent_min,cent_max,doAve));
+  c1->SaveAs(Form("plots_differential_mc%d/differential_mpt_vs_alpha_%s%s_dijet%d_cent%d_%d_doAve%d_dR_MC.png",doGenJet,smpt[domp].Data(),skind[gensigbkgreco].Data(),(int)etadijet,cent_min,cent_max,doAve));
+  c1->SaveAs(Form("plots_differential_mc%d/differential_mpt_vs_alpha_%s%s_dijet%d_cent%d_%d_doAve%d_dR_MC.pdf",doGenJet,smpt[domp].Data(),skind[gensigbkgreco].Data(),(int)etadijet,cent_min,cent_max,doAve));
  } 
  
  TCanvas * c2 = new TCanvas("c2","",600,600);
@@ -306,12 +306,12 @@ void integrated(int cent_min=0,int cent_max=20,int gensigbkgreco=3,double etadij
  drawText(Form("%d-%d %%",(int)(0.5*cent_min),(int)(0.5*cent_max)),0.22,0.93);
  // drawText(Form("%d-%d %%",(int)(0.5*cent_min),(int)(0.5*cent_max)),0.22,0.93);
  if(!doMC){
-  c2->SaveAs(Form("plots_integrated_data/integrated_mpt_vs_alpha_%s%s_dijet%d_cent%d_%d_doAve%d_dR_ref.png",smpt[domp].Data(),skind[gensigbkgreco].Data(),(int)etadijet,cent_min,cent_max,doAve));
-  c2->SaveAs(Form("plots_integrated_data/integrated_mpt_vs_alpha_%s%s_dijet%d_cent%d_%d_doAve%d_dR_ref.pdf",smpt[domp].Data(),skind[gensigbkgreco].Data(),(int)etadijet,cent_min,cent_max,doAve));
+  c2->SaveAs(Form("plots_differential_data/differential_mpt_vs_alpha_%s%s_dijet%d_cent%d_%d_doAve%d_dR_ref.png",smpt[domp].Data(),skind[gensigbkgreco].Data(),(int)etadijet,cent_min,cent_max,doAve));
+  c2->SaveAs(Form("plots_differential_data/differential_mpt_vs_alpha_%s%s_dijet%d_cent%d_%d_doAve%d_dR_ref.pdf",smpt[domp].Data(),skind[gensigbkgreco].Data(),(int)etadijet,cent_min,cent_max,doAve));
  }
  if(doMC){
-  c2->SaveAs(Form("plots_integrated_mc%d/integrated_mpt_vs_alpha_%s%s_dijet%d_cent%d_%d_doAve%d_dR_MC_ref.png",doGenJet,smpt[domp].Data(),skind[gensigbkgreco].Data(),(int)etadijet,cent_min,cent_max,doAve));
-  c2->SaveAs(Form("plots_integrated_mc%d/integrated_mpt_vs_alpha_%s%s_dijet%d_cent%d_%d_doAve%d_dR_MC_ref.pdf",doGenJet,smpt[domp].Data(),skind[gensigbkgreco].Data(),(int)etadijet,cent_min,cent_max,doAve));
+  c2->SaveAs(Form("plots_differential_mc%d/differential_mpt_vs_alpha_%s%s_dijet%d_cent%d_%d_doAve%d_dR_MC_ref.png",doGenJet,smpt[domp].Data(),skind[gensigbkgreco].Data(),(int)etadijet,cent_min,cent_max,doAve));
+  c2->SaveAs(Form("plots_differential_mc%d/differential_mpt_vs_alpha_%s%s_dijet%d_cent%d_%d_doAve%d_dR_MC_ref.pdf",doGenJet,smpt[domp].Data(),skind[gensigbkgreco].Data(),(int)etadijet,cent_min,cent_max,doAve));
  }
  
  TCanvas * c3 = new TCanvas("c3","",600,600);
@@ -335,11 +335,11 @@ void integrated(int cent_min=0,int cent_max=20,int gensigbkgreco=3,double etadij
  drawText(Form("%s",spart[gensigbkgreco].Data()),0.44,0.81);
  drawText(Form("%d-%d %%",(int)(0.5*cent_min),(int)(0.5*cent_max)),0.22,0.93);
  if(!doMC){
-  c3->SaveAs(Form("plots_integrated_data/integrated_mpt_vs_alpha_%s%s_dijet%d_cent%d_%d_doAve%d__dR_diff.png",smpt[domp].Data(),skind[gensigbkgreco].Data(),(int)etadijet,cent_min,cent_max,doAve));
-  c3->SaveAs(Form("plots_integrated_data/integrated_mpt_vs_alpha_%s%s_dijet%d_cent%d_%d_doAve%d_dR_diff.pdf",smpt[domp].Data(),skind[gensigbkgreco].Data(),(int)etadijet,cent_min,cent_max,doAve));
+  c3->SaveAs(Form("plots_differential_data/differential_mpt_vs_alpha_%s%s_dijet%d_cent%d_%d_doAve%d__dR_diff.png",smpt[domp].Data(),skind[gensigbkgreco].Data(),(int)etadijet,cent_min,cent_max,doAve));
+  c3->SaveAs(Form("plots_differential_data/differential_mpt_vs_alpha_%s%s_dijet%d_cent%d_%d_doAve%d_dR_diff.pdf",smpt[domp].Data(),skind[gensigbkgreco].Data(),(int)etadijet,cent_min,cent_max,doAve));
  }
  if(doMC){
-  c3->SaveAs(Form("plots_integrated_mc%d/integrated_mpt_vs_alpha_%s%s_dijet%d_cent%d_%d_doAve%d_dR_MC_diff.png",doGenJet,smpt[domp].Data(),skind[gensigbkgreco].Data(),(int)etadijet,cent_min,cent_max,doAve));
-  c3->SaveAs(Form("plots_integrated_mc%d/integrated_mpt_vs_alpha_%s%s_dijet%d_cent%d_%d_doAve%d_dR_MC_diff.pdf",doGenJet,smpt[domp].Data(),skind[gensigbkgreco].Data(),(int)etadijet,cent_min,cent_max,doAve));
+  c3->SaveAs(Form("plots_differential_mc%d/differential_mpt_vs_alpha_%s%s_dijet%d_cent%d_%d_doAve%d_dR_MC_diff.png",doGenJet,smpt[domp].Data(),skind[gensigbkgreco].Data(),(int)etadijet,cent_min,cent_max,doAve));
+  c3->SaveAs(Form("plots_differential_mc%d/differential_mpt_vs_alpha_%s%s_dijet%d_cent%d_%d_doAve%d_dR_MC_diff.pdf",doGenJet,smpt[domp].Data(),skind[gensigbkgreco].Data(),(int)etadijet,cent_min,cent_max,doAve));
  }
 }
