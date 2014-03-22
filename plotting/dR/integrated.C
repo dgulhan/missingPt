@@ -33,7 +33,7 @@ void drawText(const char *text, float xp, float yp, int size=18){
   tex->Draw("same");
 }
 
-void integrated(int cent_min=0,int cent_max=20,int gensigbkgreco=3,double etadijet=1.6){
+void integrated(int cent_min=0,int cent_max=20,int gensigbkgreco=0,double etadijet=1.6){
  TH1D::SetDefaultSumw2();
  int domp=0;
  
@@ -41,13 +41,13 @@ void integrated(int cent_min=0,int cent_max=20,int gensigbkgreco=3,double etadij
  TString skind[]={"","_s","_b","_tracks","_tracks_uncorr","_parts"};
  TString spart[]={"gen. part.","gen. sig.","gen. part.","corr reco. part.","uncorr. reco.","gen. part."};
  int doMC=1;
- int doAve=0;
+ int doAve=1;
  TString strave;
  if(doAve) strave="_ave";
  else strave="";
  int docorr=0;
  if(gensigbkgreco==3)docorr=1;
- int jetpt1=100;
+ int jetpt1=150;
  int jetpt2=50;
  
  int npt=6;
@@ -125,14 +125,13 @@ void integrated(int cent_min=0,int cent_max=20,int gensigbkgreco=3,double etadij
   }
   
   if(doMC){
-   f[ipt] = TFile::Open(Form("/afs/cern.ch/user/d/dgulhan/workDir/missingPt/ntuples_MC_20140315/full_ntuple_HiForest_Pythia_Hydjet_Jet80_Track8_Jet19_STARTHI53_LV1_merged_forest_0_pt%d_%d_akVs3Calo.root",(int)ptmin[ipt],(int)ptmax[ipt])); 
-   f_ref[ipt] = TFile::Open(Form("/afs/cern.ch/user/d/dgulhan/workDir/missingPt/ntuples_PYTHIA_20140315/full_ntuple_pt80_pp2013_P01_prod22_v81_merged_forest_0_pt%d_%d_ak3Calo.root",(int)ptmin[ipt],(int)ptmax[ipt])); 
+   f[ipt] = TFile::Open(Form("/afs/cern.ch/user/d/dgulhan/workDir/missingPt/ntuples_MC_20140321/full_ntuple_HiForest_Pythia_Hydjet_Jet80_Track8_Jet19_STARTHI53_LV1_merged_forest_0_pt%d_%d_akVs3Calo.root",(int)ptmin[ipt],(int)ptmax[ipt])); 
+   f_ref[ipt] = TFile::Open(Form("/afs/cern.ch/user/d/dgulhan/workDir/missingPt/ntuples_PYTHIA_20140321/full_ntuple_pt80_pp2013_P01_prod22_v81_merged_forest_0_pt%d_%d_ak3Calo.root",(int)ptmin[ipt],(int)ptmax[ipt])); 
   }
   cout<<3<<endl;
 
-  t[ipt]=(TTree*)f[ipt]->Get(Form("nt_%s%s_dR",smpt[domp].Data(),skind[gensigbkgreco].Data()));
+  t[ipt]=(TTree*)f[ipt]->Get(Form("nt_%s%s_dR%s",smpt[domp].Data(),skind[gensigbkgreco].Data(),strave.Data()));
       cout<<3.1<<endl;
-
   t_jet[ipt]=(TTree*)f[ipt]->Get("nt_jet");
   
       cout<<3.2<<endl;
@@ -152,7 +151,8 @@ void integrated(int cent_min=0,int cent_max=20,int gensigbkgreco=3,double etadij
       cout<<5<<endl;
 
   for(int ialpha=0;ialpha<nalpha+1;ialpha++ ){
-   s[ipt]+=Form("-alpha_%d",ialpha);
+   // if(ialpha<nalpha)s[ipt]+=Form("-dR_%d",ialpha);
+   if(ialpha<nalpha)s[ipt]+=Form("-alpha_%d",ialpha);
    cout<<s[ipt].Data()<<endl;
    if(ialpha<nalpha)sintegrate[ialpha][ipt]=s[ipt];
    else  sintegrate[ialpha][ipt]=Form("-%s%s%s",smpt[domp].Data(),skind[gensigbkgreco].Data(),strave.Data());
