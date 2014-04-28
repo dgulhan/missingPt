@@ -33,14 +33,14 @@ void drawText(const char *text, float xp, float yp, int size=18){
   tex->Draw("same");
 }
 
-void integrated(int cent_min=0,int cent_max=20,int gensigbkgreco=3,double etadijet=2){
+void integrated(int cent_min=0,int cent_max=20,int gensigbkgreco=0,double etadijet=2){
  TH1D::SetDefaultSumw2();
  int domp=0;
- bool doGenJet=false;
+ bool doGenJet=true;
  TString smpt[]={"mpt","mp","mpt_boosted"};
  TString skind[]={"","_s","_b","_tracks","_tracks_uncorr","_parts"};
  TString spart[]={"gen. part.","gen. sig.","gen. part.","corr reco. part.","uncorr. reco.","gen. part."};
- int doMC=0;
+ int doMC=1;
  int doAve=1;
  TString strave;
  if(doAve) strave="_ave";
@@ -49,7 +49,7 @@ void integrated(int cent_min=0,int cent_max=20,int gensigbkgreco=3,double etadij
  if(gensigbkgreco==3)docorr=1;
  int jetpt1=120; 
  int jetpt2=50;
- 
+ double Aj=0.2;
  int npt=6;
  double ptmin[]={  8,4,2,1,0.5,0.5};
  double ptmax[]={300,8,4,2,  1,300};
@@ -158,12 +158,12 @@ void integrated(int cent_min=0,int cent_max=20,int gensigbkgreco=3,double etadij
    if(ialpha<nalpha)sintegrate[ialpha][ipt]=s[ipt];
    else  sintegrate[ialpha][ipt]=Form("-%s%s%s",smpt[domp].Data(),skind[gensigbkgreco].Data(),strave.Data());
    h[ipt][ialpha]=new TH1D(Form("h_%d_%d",ialpha,ipt),"",100000,-100000,100000);
-   t[ipt]->Draw(Form("%s>>h_%d_%d",sintegrate[ialpha][ipt].Data(),ialpha,ipt),Form("pt1>%d && pt2>%d && abs(eta1)<%.1f && abs(eta2)<%.1f && dphi>(2*TMath::Pi()/3) && cent>=%d && cent<%d",jetpt1,jetpt2,etadijet,etadijet, cent_min,cent_max),"");
+   t[ipt]->Draw(Form("%s>>h_%d_%d",sintegrate[ialpha][ipt].Data(),ialpha,ipt),Form("pt1>%d && pt2>%d && abs(eta1)<%.1f && abs(eta2)<%.1f && dphi>(9*TMath::Pi()/10) && cent>=%d && cent<%d && ((pt1-pt2)/(pt2+pt1))>%.2f",jetpt1,jetpt2,etadijet,etadijet, cent_min,cent_max,Aj),"");
    mpt[ipt][ialpha]=h[ipt][ialpha]->GetMean(); 
    mpterr[ipt][ialpha]=h[ipt][ialpha]->GetMeanError();
    
    h_ref[ipt][ialpha]=new TH1D(Form("h_ref_%d_%d",ialpha,ipt),"",100000,-100000,100000);
-   t_ref[ipt]->Draw(Form("%s>>h_ref_%d_%d",sintegrate[ialpha][ipt].Data(),ialpha,ipt),Form("pt1>%d && pt2>%d && abs(eta1)<%.1f && abs(eta2)<%.1f && dphi>(2*TMath::Pi()/3)",jetpt1,jetpt2,etadijet,etadijet),"");
+   t_ref[ipt]->Draw(Form("%s>>h_ref_%d_%d",sintegrate[ialpha][ipt].Data(),ialpha,ipt),Form("pt1>%d && pt2>%d && abs(eta1)<%.1f && abs(eta2)<%.1f && dphi>(9*TMath::Pi()/10)&& ((pt1-pt2)/(pt2+pt1))>%.2f",jetpt1,jetpt2,etadijet,etadijet,Aj),"");
    mpt_ref[ipt][ialpha]=h_ref[ipt][ialpha]->GetMean();
    mpterr_ref[ipt][ialpha]=h_ref[ipt][ialpha]->GetMeanError();
    
@@ -253,8 +253,6 @@ void integrated(int cent_min=0,int cent_max=20,int gensigbkgreco=3,double etadij
  empty->Draw();
   
  for(int ipt=npt-2;ipt>=0;ipt--){ 
-  // if(ipt<2)leg->AddEntry(hmpt_vs_alpha[ipt],Form("%.1f - %.1f GeV",ptmin[ipt],ptmax[ipt]),"f l");
-  // if(ipt>=2)leg2->AddEntry(hmpt_vs_alpha[ipt],Form("%.1f - %.1f GeV",ptmin[ipt],ptmax[ipt]),"f l");
   leg2->AddEntry(hmpt_vs_alpha[ipt],Form("%.1f - %.1f GeV",ptmin[ipt],ptmax[ipt]),"f l");
   hmpt_vs_alpha[ipt]->Draw("same");
   hmpt_vs_alpha[ipt]->Draw("same hist");
@@ -271,7 +269,7 @@ void integrated(int cent_min=0,int cent_max=20,int gensigbkgreco=3,double etadij
  if(domp<2)drawText(Form("|#eta_{1}|,|#eta_{2}|<%.2f",etadijet),0.22,0.81);
  if(domp==2)drawText(Form("|#eta_{dijet}|<%.2f",etadijet),0.22,0.81);
  drawText(Form("p_{T,1}>%d, p_{T,2}>%d",jetpt1,jetpt2),0.22,0.75);
- drawText(Form("|#eta|<2, #Delta#phi_{1,2}>2#pi/3",jetpt1,jetpt2),0.44,0.93);
+ drawText(Form("|#eta|<2, #Delta#phi_{1,2}>9#pi/10",jetpt1,jetpt2),0.44,0.93);
  drawText(Form("akVs3Calo, ak3Calo"),0.44,0.87);
  drawText(Form("%s",spart[gensigbkgreco].Data()),0.44,0.81);
  drawText(Form("%d-%d %%",(int)(0.5*cent_min),(int)(0.5*cent_max)),0.22,0.93);
@@ -300,7 +298,7 @@ void integrated(int cent_min=0,int cent_max=20,int gensigbkgreco=3,double etadij
  if(domp<2)drawText(Form("|#eta_{1}|,|#eta_{2}|<%.2f",etadijet),0.22,0.81);
  if(domp==2)drawText(Form("|#eta_{dijet}|<%.2f",etadijet),0.22,0.81);
  drawText(Form("p_{T,1}>%d, p_{T,2}>%d",jetpt1,jetpt2),0.22,0.75);
- drawText(Form("|#eta|<2, #Delta#phi_{1,2}>2#pi/3",jetpt1,jetpt2),0.44,0.93);
+ drawText(Form("|#eta|<2, #Delta#phi_{1,2}>9#pi/10",jetpt1,jetpt2),0.44,0.93);
  drawText(Form("akVs3Calo, ak3Calo"),0.44,0.87);
  drawText(Form("%s",spart[gensigbkgreco].Data()),0.44,0.81);
  drawText(Form("%d-%d %%",(int)(0.5*cent_min),(int)(0.5*cent_max)),0.22,0.93);
@@ -330,7 +328,7 @@ void integrated(int cent_min=0,int cent_max=20,int gensigbkgreco=3,double etadij
  if(domp<2)drawText(Form("|#eta_{1}|,|#eta_{2}|<%.2f",etadijet),0.22,0.81);
  if(domp==2)drawText(Form("|#eta_{dijet}|<%.2f",etadijet),0.22,0.81);
  drawText(Form("p_{T,1}>%d, p_{T,2}>%d",jetpt1,jetpt2),0.22,0.75);
- drawText(Form("|#eta|<2, #Delta#phi_{1,2}>2#pi/3",jetpt1,jetpt2),0.44,0.93);
+ drawText(Form("|#eta|<2, #Delta#phi_{1,2}>9#pi/10",jetpt1,jetpt2),0.44,0.93);
  drawText(Form("akVs3Calo, ak3Calo"),0.44,0.87);
  drawText(Form("%s",spart[gensigbkgreco].Data()),0.44,0.81);
  drawText(Form("%d-%d %%",(int)(0.5*cent_min),(int)(0.5*cent_max)),0.22,0.93);
