@@ -144,7 +144,7 @@ void ntupler_MC_clean(double ptmin_trk=8,double ptmax_trk=300){
  }
  
  //output file and tree
- TFile *outf= new TFile(Form("ntuples_MC_mptonly_20140322/full_ntuple_%s_pt%d_%d_%s_doGenJet%d.root",infname.Data(),(int)ptmin_trk,(int)ptmax_trk,algo.Data(),doGenJet),"recreate");
+ TFile *outf= new TFile(Form("ntuples_MC_20140323/full_ntuple_%s_pt%d_%d_%s_doGenJet%d.root",infname.Data(),(int)ptmin_trk,(int)ptmax_trk,algo.Data(),doGenJet),"recreate");
  std::string partVars="pt:eta:phi:rmin:pNRec:smeared_pt:cent:cent_weight:matchedpt:eff:trackselect:pt1:eta1:phi1:pt2:eta2:phi2:pt3:eta3:phi3:dphi:ptratio:jetspz:jetspt:jetseta:jetsrap:jetspz_12:jetspt_12:jetsrap_12:alpha:mpt_track:vz";
  std::string trackVars="trackselect:eff:fake:trkfake:trkstatus:weight_unfold:pt:eta:phi:rmin:cent:cent_weight:pt1:eta1:phi1:pt2:eta2:phi2:pt3:eta3:phi3:dphi:ptratio:jetspz:jetspt:jetseta:jetsrap:jetspz_12:jetspt_12:jetsrap_12:alpha:mpt_track:vz";
  
@@ -342,18 +342,27 @@ void ntupler_MC_clean(double ptmin_trk=8,double ptmax_trk=300){
   float mpt_tracks_uncorr=0;
   float mpt_s=0;
   float mpt_b=0;
+  
   float mpt_alpha_s[30];
   float mpt_alpha_b[30];
   float mpt_alpha[30];
   float mpt_alpha_tracks[30];  
   float mpt_alpha_parts[30];
   float mpt_alpha_tracks_uncorr[30];
+  
   float mpt_dR_parts[35];
   float mpt_dR_tracks[35];
   float mpt_dR_tracks_uncorr[35];
   float mpt_dR_s[35];
   float mpt_dR_b[35];
   float mpt_dR[35];
+  
+  float mpt_dphi_parts[35];
+  float mpt_dphi_tracks[35];
+  float mpt_dphi_tracks_uncorr[35];
+  float mpt_dphi_s[35];
+  float mpt_dphi_b[35];
+  float mpt_dphi[35];
   
   
   for(int i=0;i<30;i++){

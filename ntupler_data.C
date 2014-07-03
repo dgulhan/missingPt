@@ -508,6 +508,12 @@ void ntupler_data(double ptmin_trk=0.5,double ptmax_trk=300){
   nt_mp_tracks_uncorr_dR->Fill(mp_dR_tracks_uncorr);
   nt_mp_boosted_tracks_uncorr_dR->Fill(mp_dR_boosted_tracks_uncorr);
  
+ double v2=0;
+ for(int ietabin=0;ietabin<15;ietabin++){
+  v2+=fpf->vn[2][ietabin];
+ }
+ v2=v2/15;
+ 
   float jtentry[]={cent,pt1,eta1,phi1,pt1_boosted,eta1_boosted,phi1_boosted,pt2,eta2,phi2,pt2_boosted,eta2_boosted,phi2_boosted,pt3,eta3,phi3,pt3_boosted,eta3_boosted,phi3_boosted,dphi,ptratio,jetspz,jetspt,jetseta,jetsrap,jetsphi,jetspz_12,jetspt_12,jetseta_12,jetsrap_12,jetsphi_12,trkrap,mpt_tracks,mpt_boosted_tracks,mp_tracks,mp_boosted_tracks,mpt_tracks_uncorr,mpt_boosted_tracks_uncorr,mp_tracks_uncorr,mp_boosted_tracks_uncorr,hfp,hfm};
   
   nt_jet->Fill(jtentry);

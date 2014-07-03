@@ -25,6 +25,29 @@
 #include "TLine.h" 
 #include "ntupler/ppTrack.C"
 
+double smearedPtv(double pt,int hiBin){
+ TF1 *f_pp = new TF1("f_pp","sqrt(pow(0.046,2)+pow(1.350/sqrt(x),2))",40,300);
+ TF1 *f_50_100 = new TF1("f_0_10","sqrt(pow(0.046,2)+pow(1.350/sqrt(x),2)+pow(3.435/x,2))",40,300);
+ TF1 *f_30_50 = new TF1("f_10_30","sqrt(pow(0.046,2)+pow(1.350/sqrt(x),2)+pow(3.721/x,2))",40,300);
+ TF1 *f_10_30 = new TF1("f_30_50","sqrt(pow(0.046,2)+pow(1.350/sqrt(x),2)+pow(4.684/x,2))",40,300);
+ TF1 *f_0_10 = new TF1("f_50_100","sqrt(pow(0.046,2)+pow(1.350/sqrt(x),2)+pow(7.665/x,2))",40,300);
+
+ TF1 * fgaus=new TF1("fgaus","gaus(0)",-20,20);
+ fgaus->SetParameters(1,0,1);
+ 
+ double sigma_pp=f_pp->Eval(pt);
+ double sigma_PbPb=sigma_pp;
+
+ if(hiBin<20) sigma_PbPb=f_0_10->Eval(pt);
+ else if(hiBin<60) sigma_PbPb=f_10_30->Eval(pt);
+ else if(hiBin<100) sigma_PbPb=f_30_50->Eval(pt);
+ else sigma_PbPb=f_50_100->Eval(pt);
+
+ double smearedPt=pt*(1+sqrt(pow(sigma_PbPb,2)-pow(sigma_pp,2))*fgaus->GetRandom());
+
+ return smearedPt;
+}
+
 Float_t getFlippedPhi(Float_t inPhi)
 {
   Float_t outPhi;
@@ -60,7 +83,7 @@ Float_t getAvePhi(Float_t inLeadPhi, Float_t inSubLeadPhi)
       avePhi = TMath::Pi() - avePhi;
     else
       avePhi = -TMath::Pi() - avePhi;
-  }
+  } 
   else{
     avePhi = 0.;
   }
@@ -80,12 +103,15 @@ TH1D::SetDefaultSumw2();
  cout<<"ptmin= "<<ptmin_trk<<" ptmax= "<<ptmax_trk<<endl;
  TString directory="root://eoscms//eos/cms/store/caf/user/dgulhan/PYTHIA/prod22_ppTracking/";
  TString infname="pt80_pp2013_P01_prod22_v81_merged_forest_0";
- 
+
+ // TString directory="root://eoscms//eos/cms/store/group/phys_heavyions/dgulhan/ppMC/";
+ // TString infname="HiForest_pt80_PYTHIA_ppReco_JECv85_merged_forest_0";
+
  ppTrack * ftrk = new ppTrack(Form("%s/%s.root",directory.Data(),infname.Data()));
  HiTree * fhi = new HiTree(Form("%s/%s.root",directory.Data(),infname.Data()));
  skimTree_pp * fskim = new skimTree_pp(Form("%s/%s.root",directory.Data(),infname.Data()));
  // HltTree_pp * fhlt = new HltTree_pp(Form("%s/%s.root",directory.Data(),infname.Data()));
- t * fjet = new t(Form("%s/%s.root",directory.Data(),infname.Data()),algo.Data());
+ t * fjet = new t(Form("%s/%s.root",directory.Data(),infname.Data()),"akPu5PF");
  hi * fgen = new hi(Form("%s/%s.root",directory.Data(),infname.Data()));
  // hi * fgen = new hi(Form("%s/%s.root",directory.Data(),infname.Data()));
 
@@ -94,6 +120,10 @@ TH1D::SetDefaultSumw2();
  TFile * f_unfold=new TFile("binbybin_pt.root");
  TH1D *hweight = (TH1D*)f_unfold->Get("hweight");
  TH1D *h_res = (TH1D*)f_unfold->Get("h_res");
+ 
+ TF1 * func_pp = new TF1("func_pp","[0]/(x*x)-[1]/x+[2]*x+[3]",0.5,20);
+ func_pp->SetParameters(2.09942e-04, -2.08658e-03, 1.89245e-04, 1.19956e-02);
+ 
  TF1 * fgaus=new TF1("fgaus","gaus(0)",-20,20);
  fgaus->SetParameters(1,0,1);
   
@@ -114,8 +144,8 @@ TH1D::SetDefaultSumw2();
  TProfile *p_eff_pt[npt]; 
  TProfile *p_eff_rmin[npt]; 
  for(int ipt=0; ipt<npt;ipt++){
-   if(ipt<npt-1)f_eff[ipt]= new TFile(Form("/afs/cern.ch/user/d/dgulhan/workDir/trackEfficiency/final_hists_%s/eff_pt%d_%d_accept4pt4rmin3_%s_dogenjet0.root",algo.Data(),(int)ptmin[ipt],(int)ptmax[ipt],algo.Data()));
-   else f_eff[ipt]= new TFile(Form("/afs/cern.ch/user/d/dgulhan/workDir/trackEfficiency/final_hists_%s/eff_pt%d_%d_accept3pt3rmin3_%s_dogenjet0.root",algo.Data(),(int)ptmin[ipt],(int)ptmax[ipt],algo.Data()));
+   if(ipt<npt-1)f_eff[ipt]= new TFile(Form("/afs/cern.ch/user/d/dgulhan/workDir/trackEfficiency/final_hists_%s_20140414/eff_pt%d_%d_accept4pt4rmin3_%s_dogenjet0.root",algo.Data(),(int)ptmin[ipt],(int)ptmax[ipt],algo.Data()));
+   else f_eff[ipt]= new TFile(Form("/afs/cern.ch/user/d/dgulhan/workDir/trackEfficiency/final_hists_%s_20140414/eff_pt%d_%d_accept4pt4rmin4_%s_dogenjet0.root",algo.Data(),(int)ptmin[ipt],(int)ptmax[ipt],algo.Data()));
    p_eff_pt[ipt]=(TProfile*)f_eff[ipt]->Get("p_eff_pt");
    p_eff_accept[ipt]=(TProfile2D*)f_eff[ipt]->Get("p_eff_acceptance");
    p_eff_rmin[ipt]=(TProfile*)f_eff[ipt]->Get("p_eff_rmin");
@@ -125,14 +155,17 @@ TH1D::SetDefaultSumw2();
  TProfile *p_fake_pt[npt]; 
  TProfile *p_fake_rmin[npt]; 
  for(int ipt=0; ipt<npt;ipt++){
-   f_fake[ipt]= new TFile(Form("/afs/cern.ch/user/d/dgulhan/workDir/trackFake_pp/final_hists_%s/fake_pt%d_%d_step_accept5pt5rmin4_%s_dogenjet0.root",algo.Data(),(int)ptmin[ipt],(int)ptmax[ipt],algo.Data()));
+   if(ipt<npt-1)f_fake[ipt]= new TFile(Form("/afs/cern.ch/user/d/dgulhan/workDir/trackFake_pp/final_hists_%s_20140414/fake_pt%d_%d_step_accept4pt4rmin3_%s_dogenjet0.root",algo.Data(),(int)ptmin[ipt],(int)ptmax[ipt],algo.Data()));
+   else f_fake[ipt]= new TFile(Form("/afs/cern.ch/user/d/dgulhan/workDir/trackFake_pp/final_hists_%s_20140414/fake_pt%d_%d_step_accept4pt4rmin4_%s_dogenjet0.root",algo.Data(),(int)ptmin[ipt],(int)ptmax[ipt],algo.Data()));
    p_fake_pt[ipt]=(TProfile*)f_fake[ipt]->Get("p_fake_pt");
    p_fake_accept[ipt]=(TProfile2D*)f_fake[ipt]->Get("p_fake_acceptance");
    p_fake_rmin[ipt]=(TProfile*)f_fake[ipt]->Get("p_fake_rmin");
  }
  
+ 
  //output file and tree
- TFile *outf= new TFile(Form("ntuples_PYTHIA_mptonly_20140325_v4/full_ntuple_%s_pt%d_%d_%s_doGenJet%d.root",infname.Data(),(int)ptmin_trk,(int)ptmax_trk,algo.Data(),doGenJet),"recreate");
+ // TFile *outf= new TFile(Form("ntuples_PYTHIA_20140429_multdiff/full_ntuple_%s_pt%d_%d_%s_doGenJet%d.root",infname.Data(),(int)ptmin_trk,(int)ptmax_trk,algo.Data(),doGenJet),"recreate");
+ TFile *outf= new TFile(Form("r05genjet_full_ntuple_%s_pt%d_%d_%s_doGenJet%d.root",infname.Data(),(int)ptmin_trk,(int)ptmax_trk,algo.Data(),doGenJet),"recreate");
  std::string partVars="pt:eta:phi:rmin:pNRec:smeared_pt:matchedpt:eff:trackselect:pt1:eta1:phi1:pt2:eta2:phi2:pt3:eta3:phi3:dphi:ptratio:jetspz:jetspt:jetseta:jetsrap:jetspz_12:jetspt_12:jetsrap_12:alpha:mpt_track:vz";
  std::string trackVars="trackselect:eff:fake:trkfake:trkstatus:weight_unfold:pt:eta:phi:rmin:pt1:eta1:phi1:pt2:eta2:phi2:pt3:eta3:phi3:dphi:ptratio:jetspz:jetspt:jetseta:jetsrap:jetspz_12:jetspt_12:jetsrap_12:alpha:alpha_ave:mpt_track:vz";
  
@@ -142,10 +175,8 @@ TH1D::SetDefaultSumw2();
  TNtuple *nt_gen = new TNtuple("nt_gen","","pt:eta:phi:vz:sta");
  
  
- std:string jetVars="pt1:eta1:phi1:pt2:eta2:phi2:pt3:eta3:phi3:dphi:ptratio:jetspz:jetspt:jetseta:jetsrap:jetsphi:jetspz_12:jetspt_12:jetseta_12:jetsrap_12:jetsphi_12:trkrap:mpt:mpt_s:mpt_b:mpt_tracks:mpt_tracks_ls:mpt_parts:mpt_tracks_uncorr:mpt_ave:mpt_b_ave:mpt_s_ave:mpt_tracks_ave:mpt_tracks_uncorr_ave:hfp:hfm:Npassingtrk:vz";
- 
- 
- 
+ std:string jetVars="w_vz:pthat:pt1:eta1:phi1:pt2:eta2:phi2:pt3:eta3:phi3:dphi:ptratio:pt1_0_10:pt1_10_30:pt1_30_50:pt1_50_100:eta1_0_10:eta1_10_30:eta1_30_50:eta1_50_100:phi1_0_10:phi1_10_30:phi1_30_50:phi1_50_100:pt2_0_10:pt2_10_30:pt2_30_50:pt2_50_100:eta2_0_10:eta2_10_30:eta2_30_50:eta2_50_100:phi2_0_10:phi2_10_30:phi2_30_50:phi2_50_100:pt3_0_10:pt3_10_30:pt3_30_50:pt3_50_100:eta3_0_10:eta3_10_30:eta3_30_50:eta3_50_100:phi3_0_10:phi3_10_30:phi3_30_50:phi3_50_100:jetspz:jetspt:jetseta:jetsrap:jetsphi:jetspz_12:jetspt_12:jetseta_12:jetsrap_12:jetsphi_12:trkrap:mpt:mpt_s:mpt_b:mpt_tracks:mpt_tracks_ls:mpt_parts:mpt_tracks_uncorr:mpt_ave:mpt_b_ave:mpt_s_ave:mpt_tracks_ave:mpt_tracks_uncorr_ave:mpt_ave_smeared:hfp:hfm:Npassingtrk:vz:n_lead:n_sublead:n_lead_gen:n_sublead_gen:n_lead_s:n_sublead_s:n_lead_b:n_sublead_b";
+
  TNtuple *nt_jet = new TNtuple("nt_jet","",jetVars.data());
 
  std::string mptVars="alpha_0:alpha_1:alpha_2:alpha_3:alpha_4:alpha_5:alpha_6:alpha_7:alpha_8:alpha_9:alpha_10:alpha_11:alpha_12:alpha_13:alpha_14:alpha_15";
@@ -174,6 +205,7 @@ TH1D::SetDefaultSumw2();
  TNtuple *nt_mpt_s_dR_ave=new TNtuple("nt_mpt_s_dR_ave","",mptVars_dR.data());
  TNtuple *nt_mpt_b_dR_ave=new TNtuple("nt_mpt_b_dR_ave","",mptVars_dR.data());
  TNtuple *nt_mpt_dR_ave=new TNtuple("nt_mpt_dR_ave","",mptVars_dR.data());
+ TNtuple *nt_mpt_dR_ave_smeared=new TNtuple("nt_mpt_dR_ave_smeared","",mptVars_dR.data());
  TNtuple *nt_mpt_tracks_dR_ave=new TNtuple("nt_mpt_tracks_dR_ave","",mptVars_dR.data());
  TNtuple *nt_mpt_tracks_uncorr_dR_ave=new TNtuple("nt_mpt_tracks_uncorr_dR_ave","",mptVars_dR.data());
  
@@ -204,9 +236,33 @@ TH1D::SetDefaultSumw2();
  TNtuple *nt_mpt_tracks_deta_ave=new TNtuple("nt_mpt_tracks_deta_ave","",mptVars_deta.data());
  TNtuple *nt_mpt_tracks_uncorr_deta_ave=new TNtuple("nt_mpt_tracks_uncorr_deta_ave","",mptVars_deta.data());
 
- cout<<"2"<<endl;
+ 
+ TFile *f_multrec= new TFile("../JetTrack/trackMultipleRec/multreco_pp.root");
+ TFile *f_secondary;
+ f_secondary= new TFile("../JetTrack/trackSecondary/secondary_2d.root");
+ 
+ TH2D * hsecondary = (TH2D*)f_secondary->Get("hpt_eta");
+ TH2D * hmultrec = (TH2D*)f_multrec->Get("heta_pt");
+ 
+ TFile *f_spec = new TFile("trkpt_rat_pp.root");
+ TH1D* hweight_spec = (TH1D*)f_spec->Get("hrat_pt_raw");
+ 
+ 
+  TNtuple *nt_evt = new TNtuple("nt_evt","","w_vz:weight:vz:pt1:pt2:dphi");
+ TFile *f_vz_weight = new TFile("/afs/cern.ch/user/d/dgulhan/workDir/trackEfficiency/ntupler/vz_rat.root");
+ TH1D * h_vz_weight = (TH1D * )f_vz_weight->Get("hrat");
+ 
  //loop over events
  int nentries = ftrk->GetEntriesFast();
+	
+	 TF1 *f_pp = new TF1("f_pp","sqrt(pow(0.046,2)+pow(1.350/sqrt(x),2))",40,300);
+     TF1 *f_50_100 = new TF1("f_0_10","sqrt(pow(0.046,2)+pow(1.350/sqrt(x),2)+pow(3.435/x,2))",40,300);
+     TF1 *f_30_50 = new TF1("f_10_30","sqrt(pow(0.046,2)+pow(1.350/sqrt(x),2)+pow(3.721/x,2))",40,300);
+     TF1 *f_10_30 = new TF1("f_30_50","sqrt(pow(0.046,2)+pow(1.350/sqrt(x),2)+pow(4.684/x,2))",40,300);
+     TF1 *f_0_10 = new TF1("f_50_100","sqrt(pow(0.046,2)+pow(1.350/sqrt(x),2)+pow(7.665/x,2))",40,300);
+
+
+ 
  for(int jentry=0;jentry<nentries;jentry++){
  // for(int jentry=0;jentry<100;jentry++){
   if((jentry%1000)==0) std::cout<<jentry<<"/"<<nentries<<std::endl;
@@ -218,33 +274,44 @@ TH1D::SetDefaultSumw2();
   
   // cout<<"pcoll "<<fskim->pcollisionEventSelection<<endl;
   // cout<<"noisefilter "<<fskim->pHBHENoiseFilter<<endl;
-    if(!(fskim->pPAcollisionEventSelectionPA))continue;
+   if(!(fskim->pPAcollisionEventSelectionPA))continue;
   
   // cout<<"passed selection"<<endl;
   float vz = fhi->vz;
+   float w_vz=h_vz_weight->GetBinContent(h_vz_weight->FindBin(vz));
+
   float hfp = fhi->hiHFplusEta4;
   float hfm = fhi->hiHFminusEta4;
-  float pt1=-99;
-  float phi1=-99;
-  float eta1=-99;
+  float pt1,pt1_0_10,pt1_10_30,pt1_30_50,pt1_50_100;
+  pt1=pt1_0_10=pt1_10_30=pt1_30_50=pt1_50_100=-99;
+  float phi1,phi1_0_10,phi1_10_30,phi1_30_50,phi1_50_100;
+  phi1=phi1_0_10=phi1_10_30=phi1_30_50=phi1_50_100=-99;
+  float eta1,eta1_0_10,eta1_10_30,eta1_30_50,eta1_50_100;
+  eta1=eta1_0_10=eta1_10_30=eta1_30_50=eta1_50_100=-99;
   float refpt1=-99;
   float refeta1=-99;
   float refphi1=-99;
   float neutralMax1=-99;
   float trackMax1=-99;
   float trackN1=-99;
-  float pt2=-99;
-  float phi2=-99;
-  float eta2=-99;
+  float pt2,pt2_0_10,pt2_10_30,pt2_30_50,pt2_50_100;
+  pt1=pt2_0_10=pt2_10_30=pt2_30_50=pt2_50_100=-99;
+  float phi2,phi2_0_10,phi2_10_30,phi2_30_50,phi2_50_100;
+  phi2=phi2_0_10=phi2_10_30=phi2_30_50=phi2_50_100=-99;
+  float eta2,eta2_0_10,eta2_10_30,eta2_30_50,eta2_50_100;
+  eta2=eta2_0_10=eta2_10_30=eta2_30_50=eta2_50_100=-99;
   float refpt2=-99;
   float refphi2=-99;
   float refeta2=-99;
   float neutralMax2=-99;
   float trackMax2=-99;
   float trackN2=-99;
-  float pt3=-99;
-  float phi3=-99;
-  float eta3=-99;
+  float pt3,pt3_0_10,pt3_10_30,pt3_30_50,pt3_50_100;
+  pt3=pt3_0_10=pt3_10_30=pt3_30_50=pt3_50_100=-99;
+  float phi3,phi3_0_10,phi3_10_30,phi3_30_50,phi3_50_100;
+  phi3=phi3_0_10=phi3_10_30=phi3_30_50=phi3_50_100=-99;
+  float eta3,eta3_0_10,eta3_10_30,eta3_30_50,eta3_50_100;
+  eta3=eta3_0_10=eta3_10_30=eta3_30_50=eta3_50_100=-99;
   float refpt3=-99;
   float refeta3=-99;
   float refphi3=-99;
@@ -253,14 +320,38 @@ TH1D::SetDefaultSumw2();
   float trackN3=-99; 
   float dphi=-99;
   float ptratio=-99;
-  std::vector<std::pair<double, std::pair<double,double> >  >jets;
   
+  int n_lead,n_sublead,n_lead_gen,n_sublead_gen,n_lead_s,n_sublead_s,n_lead_b,n_sublead_b;
+  n_lead=n_sublead=n_lead_gen=n_sublead_gen=n_lead_s=n_sublead_s=n_lead_b=n_sublead_b=0;
+  
+  std::vector<std::pair<double, std::pair<double,double> >  >jets;
+  std::vector<std::pair<double, std::pair<double,double> >  >jets_0_10;
+  std::vector<std::pair<double, std::pair<double,double> >  >jets_10_30;
+  std::vector<std::pair<double, std::pair<double,double> >  >jets_30_50;
+  std::vector<std::pair<double, std::pair<double,double> >  >jets_50_100;
   int njet=0;
   TLorentzVector vjets;
   if(!doGenJet){
    for(int ijet=0;ijet<fjet->nref;ijet++){
-    if(fabs(fjet->jteta[ijet])>2 ||fjet->jtpt[ijet]<30) continue;
+    if(fabs(fjet->jteta[ijet])>2) continue;
     jets.push_back(std::make_pair(fjet->jtpt[ijet],std::make_pair(fjet->jteta[ijet],fjet->jtphi[ijet])));
+    double jetpt=fjet->jtpt[ijet];
+    double sigma_pp=f_pp->Eval(jetpt);
+    double sigma_0_10,sigma_10_30,sigma_30_50,sigma_50_100;
+    sigma_0_10=sigma_10_30=sigma_30_50=sigma_50_100;
+    sigma_0_10=f_0_10->Eval(jetpt);
+    sigma_10_30=f_10_30->Eval(jetpt);
+    sigma_30_50=f_30_50->Eval(jetpt);
+    sigma_50_100=f_50_100->Eval(jetpt);
+    jets_0_10.push_back(std::make_pair(jetpt*(1+sqrt(pow(sigma_0_10,2)-pow(sigma_pp,2))*fgaus->GetRandom()),std::make_pair(fjet->jteta[ijet],fjet->jtphi[ijet])));
+    jets_10_30.push_back(std::make_pair(jetpt*(1+sqrt(pow(sigma_10_30,2)-pow(sigma_pp,2))*fgaus->GetRandom()),std::make_pair(fjet->jteta[ijet],fjet->jtphi[ijet])));
+    jets_30_50.push_back(std::make_pair(jetpt*(1+sqrt(pow(sigma_30_50,2)-pow(sigma_pp,2))*fgaus->GetRandom()),std::make_pair(fjet->jteta[ijet],fjet->jtphi[ijet])));
+    jets_50_100.push_back(std::make_pair(jetpt*(1+sqrt(pow(sigma_50_100,2)-pow(sigma_pp,2))*fgaus->GetRandom()),std::make_pair(fjet->jteta[ijet],fjet->jtphi[ijet])));
+  
+    // jets_0_10.push_back(std::make_pair(smearedPtv(fjet->jtpt[ijet],10),std::make_pair(fjet->jteta[ijet],fjet->jtphi[ijet])));
+    // jets_10_30.push_back(std::make_pair(smearedPtv(fjet->jtpt[ijet],30),std::make_pair(fjet->jteta[ijet],fjet->jtphi[ijet])));
+    // jets_30_50.push_back(std::make_pair(smearedPtv(fjet->jtpt[ijet],70),std::make_pair(fjet->jteta[ijet],fjet->jtphi[ijet])));
+    // jets_50_100.push_back(std::make_pair(smearedPtv(fjet->jtpt[ijet],150),std::make_pair(fjet->jteta[ijet],fjet->jtphi[ijet])));
   
     TLorentzVector vjet;
     vjet.SetPtEtaPhiM(fjet->jtpt[ijet],fjet->jteta[ijet],fjet->jtphi[ijet],0);
@@ -270,8 +361,10 @@ TH1D::SetDefaultSumw2();
   }else{
    for(int ijet=0;ijet<fjet->ngen;ijet++){
     if(fabs(fjet->geneta[ijet])>2 ||fjet->genpt[ijet]<30) continue;
+    double sigma_pp=f_pp->Eval(fjet->genpt[ijet]);
+
     jets.push_back(std::make_pair(fjet->genpt[ijet],std::make_pair(fjet->geneta[ijet],fjet->genphi[ijet])));
-  
+    jets_0_10.push_back(std::make_pair(fjet->genpt[ijet]*(1+pow(sigma_pp,2)*fgaus->GetRandom()),std::make_pair(fjet->jteta[ijet],fjet->jtphi[ijet])));
     TLorentzVector vjet;
     vjet.SetPtEtaPhiM(fjet->genpt[ijet],fjet->geneta[ijet],fjet->genphi[ijet],0);
     vjets+=vjet;
@@ -289,6 +382,12 @@ TH1D::SetDefaultSumw2();
 
   TLorentzVector vls;
   std::sort(jets.begin(),jets.end());
+  std::sort(jets_0_10.begin(),jets_0_10.end());
+  if(!doGenJet){
+   std::sort(jets_10_30.begin(),jets_10_30.end());
+   std::sort(jets_30_50.begin(),jets_30_50.end());
+   std::sort(jets_50_100.begin(),jets_50_100.end());
+  }
   if(njet>0){
    jetspx =vjets.Px();
    jetspy=vjets.Py();
@@ -300,6 +399,20 @@ TH1D::SetDefaultSumw2();
    pt1= jets[njet-1].first;
    eta1= jets[njet-1].second.first;
    phi1= jets[njet-1].second.second;
+   pt1_0_10= jets_0_10[njet-1].first;
+   eta1_0_10= jets_0_10[njet-1].second.first;
+   phi1_0_10= jets_0_10[njet-1].second.second;
+   if(!doGenJet){
+    pt1_10_30= jets_10_30[njet-1].first;
+    eta1_10_30= jets_10_30[njet-1].second.first;
+    phi1_10_30= jets_10_30[njet-1].second.second;
+    pt1_30_50= jets_30_50[njet-1].first;
+    eta1_30_50= jets_30_50[njet-1].second.first;
+    phi1_30_50= jets_30_50[njet-1].second.second;
+    pt1_50_100= jets_50_100[njet-1].first;
+    eta1_50_100= jets_50_100[njet-1].second.first;
+    phi1_50_100= jets_50_100[njet-1].second.second;
+   }
    v1.SetPtEtaPhiM(pt1,eta1,phi1,0);
    vls+=v1;
    vave=(v1-v2);
@@ -307,6 +420,20 @@ TH1D::SetDefaultSumw2();
     pt2=jets[njet-2].first;
     eta2=jets[njet-2].second.first;
     phi2=jets[njet-2].second.second;
+    pt2_0_10=jets_0_10[njet-2].first;
+    eta2_0_10=jets_0_10[njet-2].second.first;
+    phi2_0_10=jets_0_10[njet-2].second.second;
+    if(!doGenJet){
+     pt2_10_30=jets_10_30[njet-2].first;
+     eta2_10_30=jets_10_30[njet-2].second.first;
+     phi2_10_30=jets_10_30[njet-2].second.second;
+     pt2_30_50=jets_30_50[njet-2].first;
+     eta2_30_50=jets_30_50[njet-2].second.first;
+     phi2_30_50=jets_30_50[njet-2].second.second;
+     pt2_50_100=jets_50_100[njet-2].first;
+     eta2_50_100=jets_50_100[njet-2].second.first;
+     phi2_50_100=jets_50_100[njet-2].second.second;
+    }
     v2.SetPtEtaPhiM(pt2,eta2,phi2,0);
     dphi=acos(cos(phi1-phi2));
     ptratio=pt2/pt1;
@@ -316,7 +443,23 @@ TH1D::SetDefaultSumw2();
      pt3=jets[njet-3].first;
      eta3=jets[njet-3].second.first;
      phi3=jets[njet-3].second.second;
-     v3.SetPtEtaPhiM(pt2,eta2,phi2,0);
+	 
+     pt3_0_10=jets_0_10[njet-3].first;
+     eta3_0_10=jets_0_10[njet-3].second.first;
+     phi3_0_10=jets_0_10[njet-3].second.second;
+     if(!doGenJet){
+      pt3_10_30=jets_10_30[njet-3].first;
+      eta3_10_30=jets_10_30[njet-3].second.first;
+      phi3_10_30=jets_10_30[njet-3].second.second;
+      pt3_30_50=jets_30_50[njet-3].first;
+      eta3_30_50=jets_30_50[njet-3].second.first;
+      phi3_30_50=jets_30_50[njet-3].second.second;
+      pt3_50_100=jets_50_100[njet-3].first;
+      eta3_50_100=jets_50_100[njet-3].second.first;
+      phi3_50_100=jets_50_100[njet-3].second.second;
+     }
+      v3.SetPtEtaPhiM(pt2,eta2,phi2,0);
+
     }
    }
   }
@@ -340,8 +483,9 @@ TH1D::SetDefaultSumw2();
     jetsrap_12=vls.Rapidity();
   }
   
-  
+
   float mpt_ave=0;
+  float mpt_ave_smeared=0;
   float mpt_tracks_ave=0;
   float mpt_tracks_uncorr_ave=0;
   float mpt_s_ave=0;
@@ -349,6 +493,7 @@ TH1D::SetDefaultSumw2();
 
   float mpt_dR_tracks_uncorr_ave[29];
   float mpt_dR_ave[29];
+  float mpt_dR_ave_smeared[29];
   float mpt_dR_s_ave[29];
   float mpt_dR_b_ave[29];
   float mpt_dR_tracks_ave[29];
@@ -402,7 +547,7 @@ TH1D::SetDefaultSumw2();
   float mpt_deta_s[29];
   float mpt_deta_b[29];
   float mpt_deta[29];
-  
+
   for(int i=0;i<16;i++){
    mpt_alpha[i]=0;  
    mpt_alpha_s[i]=0;  
@@ -451,6 +596,7 @@ TH1D::SetDefaultSumw2();
    mpt_dR_s_ave[i]=0;  
    mpt_dR_b_ave[i]=0;  
    mpt_dR_ave[i]=0;  
+   mpt_dR_ave_smeared[i]=0;  
   }
   
   TLorentzVector vparticles, vsignal, vbackground,vtracks;
@@ -463,7 +609,7 @@ TH1D::SetDefaultSumw2();
    float matchedpt=ftrk->mtrkPt[itrk];
    float phi=ftrk->pPhi[itrk];
    float pNRec =ftrk->pNRec[itrk];
-   float smeared_pt=pt*(1+h_res->GetBinContent(h_res->FindBin(pt))*fgaus->GetRandom());
+   float smeared_pt=pt*(1+func_pp->Eval(pt)*fgaus->GetRandom());
 
    float eff_pt,eff_accept,eff_rmin;
    eff_pt=eff_accept=eff_rmin=1;
@@ -517,7 +663,6 @@ TH1D::SetDefaultSumw2();
 	
     double mpt_alpha_t[16];
     double mpt_dR_t[29];
-    
    for(int i=0;i<16;i++){
      mpt_alpha_t[i]=0;
 	 if((alpha < dR_upperbound[i+1]) || (alpha > (TMath::Pi()-dR_upperbound[i+1]))) mpt_alpha_t[i] =pt*cos(phi -phi1);
@@ -533,6 +678,7 @@ TH1D::SetDefaultSumw2();
 
   }
   }
+
   int Npassingtrk=0;
   for(int itrk=0;itrk<ftrk->nTrk;itrk++){
    float eta=ftrk->trkEta[itrk];
@@ -549,6 +695,9 @@ TH1D::SetDefaultSumw2();
    if(fabs(eta)>2.4) continue;
    if(pt<ptmin_trk || pt>ptmax_trk) continue; 
    float trackselect=(ftrk->highPurity[itrk] && fabs(ftrk->trkDxy1[itrk]/ftrk->trkDxyError1[itrk])<3.0 && fabs(ftrk->trkDz1[itrk]/ftrk->trkDzError1[itrk])<3 && (ftrk->trkPtError[itrk]/ftrk->trkPt[itrk])<0.1);
+   
+   float weight_spec = 1;
+   if(pt<100)weight_spec=hweight_spec->GetBinContent(hweight_spec->FindBin(pt));
    
    float weight_unfold=hweight->GetBinContent(hweight->FindBin(pt));
    
@@ -576,15 +725,24 @@ TH1D::SetDefaultSumw2();
       if(rmin<5) fake_rmin=p_fake_rmin[ipt]->GetBinContent(p_fake_rmin[ipt]->FindBin(rmin));
      }     
    }
-  
-   float eff=1;
+     float eff=1;
    eff=eff_accept*eff_pt*eff_rmin;
-   if(eff==0){
-    if(pt>100)eff=0.8;
-	else eff=1;
-   }
    float fake=0;
-   if(pt<100)fake=fake_accept+fake_pt+fake_rmin;
+   if(pt<300)fake=fake_accept+fake_pt+fake_rmin;
+   if(fake<0) fake=0;
+   
+   if(eff==0){
+    cout<<"zero efficiency"<<" eta="<<eta<<" pt="<<pt<<" phi="<<phi<<endl;
+	  if(pt>100)eff=0.8;
+	  else eff=1;
+   }
+   float multrec=0;
+   multrec=hmultrec->GetBinContent(hmultrec->FindBin(pt,eta));
+   float secondary=0;
+   secondary=hsecondary->GetBinContent(hsecondary->FindBin(pt,eta));
+   
+   
+   float correction = ((1-fake)*(1-secondary)/(eff));
    
    TLorentzVector vp;
    vp.SetPtEtaPhiM(pt,eta,phi,0.13957018);
@@ -599,10 +757,10 @@ TH1D::SetDefaultSumw2();
    alpha_sub=vp.Angle(v2.Vect());
    float mpt_track=pt*cos(phi-phi1);
    if(trackselect){
-    mpt_tracks+=((1-fake)/eff)*pt*cos(phi-phi1);
-    mpt_tracks_ls+=((1-fake)/eff)*pt*(cos(phi-phi1)-cos(phi-phi2));
+    mpt_tracks+=correction*pt*cos(phi-phi1);
+    mpt_tracks_ls+=correction*pt*(cos(phi-phi1)-cos(phi-phi2));
     mpt_tracks_uncorr+=pt*cos(phi-phi1);
-    mpt_tracks_ave+=((1-fake)/eff)*pt*cos(phi-phiave);
+    mpt_tracks_ave+=correction*pt*cos(phi-phiave);
     mpt_tracks_uncorr_ave+=pt*cos(phi-phiave);
    }
    if(njet>1){
@@ -621,14 +779,19 @@ TH1D::SetDefaultSumw2();
     double mpt_deta_t[29];
     double mpt_deta_t_ave[29];
     
+    double dphiave=acos(cos(phi-phiave));	
+	
+ 	 if(dphiave<TMath::Pi()/2)n_lead+=((1-fake)/eff);
+	 if(dphiave>TMath::Pi()/2)n_sublead+=((1-fake)/eff);
+   
    for(int i=0;i<16;i++){
       mpt_alpha_t[i]=0;
       mpt_alpha_t_ave[i]=0;
 	 if((alpha < dR_upperbound[i+1]) || (alpha > (TMath::Pi()-dR_upperbound[i+1]))) mpt_alpha_t[i] =pt*cos(phi -phi1);
 	 if((alpha_ave < dR_upperbound[i+1]) || (alpha_ave > (TMath::Pi()-dR_upperbound[i+1]))) mpt_alpha_t_ave[i] =pt*cos(phi -phiave);
-      mpt_alpha_tracks[i]+=((1-fake)/eff)*mpt_alpha_t[i];
+      mpt_alpha_tracks[i]+=correction*mpt_alpha_t[i];
       mpt_alpha_tracks_uncorr[i]+=mpt_alpha_t[i];
-      mpt_alpha_tracks_ave[i]+=((1-fake)/eff)*mpt_alpha_t_ave[i];
+      mpt_alpha_tracks_ave[i]+=correction*mpt_alpha_t_ave[i];
       mpt_alpha_tracks_uncorr_ave[i]+=mpt_alpha_t_ave[i];
     }
 	
@@ -653,16 +816,16 @@ TH1D::SetDefaultSumw2();
       mpt_dphi_t[i]=0;
       mpt_dphi_t_ave[i]=0;
 	  
-	  double dphi1=acos(cos(phi1-phi));
-	  double dphi2=acos(cos(phi2-phi));
+	  double dphi1=abs(acos(cos(phi1-phi)));
+	  double dphi2=abs(acos(cos(phi2-phi)));
 	  
 	  if((dphi1 < dR_upperbound[i+1]) || (dphi2 < dR_upperbound[i+1])){
  	   mpt_dphi_t[i] =pt*cos(phi -phi1);
 	   mpt_dphi_t_ave[i]=pt*cos(phi-phiave);
 	  }
     
-      mpt_dphi_tracks[i]+=((1-fake)/eff)*mpt_dphi_t[i];
-      mpt_dphi_tracks_ave[i]+=((1-fake)/eff)*mpt_dphi_t_ave[i];
+      mpt_dphi_tracks[i]+=correction*mpt_dphi_t[i];
+      mpt_dphi_tracks_ave[i]+=correction*mpt_dphi_t_ave[i];
       mpt_dphi_tracks_uncorr[i]+=mpt_dphi_t[i];
       mpt_dphi_tracks_uncorr_ave[i]+=mpt_dphi_t_ave[i];
 	 }
@@ -678,8 +841,8 @@ TH1D::SetDefaultSumw2();
 	   mpt_deta_t_ave[i]=pt*cos(phi-phiave);
 	  }
     
-      mpt_deta_tracks[i]+=((1-fake)/eff)*mpt_deta_t[i];
-      mpt_deta_tracks_ave[i]+=((1-fake)/eff)*mpt_deta_t_ave[i];
+      mpt_deta_tracks[i]+=correction*mpt_deta_t[i];
+      mpt_deta_tracks_ave[i]+=correction*mpt_deta_t_ave[i];
       mpt_deta_tracks_uncorr[i]+=mpt_deta_t[i];
       mpt_deta_tracks_uncorr_ave[i]+=mpt_deta_t_ave[i];
 	 }
@@ -688,7 +851,7 @@ TH1D::SetDefaultSumw2();
  
 
   }
-  
+
   for(int itrk=0;itrk<fgen->mult;itrk++){
    
    float eta=fgen->eta[itrk];
@@ -699,7 +862,8 @@ TH1D::SetDefaultSumw2();
    if(fgen->chg[itrk]==0)continue;   
    float phi=fgen->phi[itrk];
    float sta=fgen->sta[itrk];
-   
+   float smeared_pt=pt*(1+func_pp->Eval(pt)*fgaus->GetRandom());
+
    float trackselect=1;
    
    float rmin=100;
@@ -730,6 +894,7 @@ TH1D::SetDefaultSumw2();
     
 	 float mpt_track=pt*cos(phi-phi1);
 	 float mpt_track_ave=pt*cos(phi-phiave);
+	 float mpt_track_ave_smeared=smeared_pt*cos(phi-phiave);
    if(signal==1){ 
 	  mpt_track_s=pt*cos(phi-phi1);
 	  mpt_track_s_ave=mpt_track_ave;
@@ -739,6 +904,7 @@ TH1D::SetDefaultSumw2();
     mpt_track_b_ave=mpt_track_ave;
    }
    mpt+=mpt_track;
+   mpt_ave_smeared+=mpt_track_ave_smeared;
    mpt_ave+=mpt_track_ave;
    mpt_s+=mpt_track_s;
    mpt_s_ave+=mpt_track_s_ave;
@@ -753,16 +919,35 @@ TH1D::SetDefaultSumw2();
     double mpt_alpha_t_ave[16];
     double mpt_dR_t[29];
     double mpt_dR_t_ave[29];
+    double mpt_dR_t_ave_smeared[29];
     double mpt_dphi_t[29];
     double mpt_dphi_t_ave[29];
     double mpt_deta_t[29];
     double mpt_deta_t_ave[29];
         
+    double dphiave=acos(cos(phi-phiave));	
+	
+	 if(dphiave<TMath::Pi()/2)n_lead_gen++;
+	 if(dphiave>TMath::Pi()/2)n_sublead_gen++;
+   if(signal==1){	
+    if(dphiave<TMath::Pi()/2)n_lead_s++;
+	  if(dphiave>TMath::Pi()/2)n_sublead_s++;
+   }else{	
+    if(dphiave<TMath::Pi()/2)n_lead_b++;
+	  if(dphiave>TMath::Pi()/2)n_sublead_b++;
+   }
+   
+	  double dphi1=abs(acos(cos(phi1-phi)));
+	  double dphi2=abs(acos(cos(phi2-phi)));
+	  double dR1=sqrt(pow(acos(cos(phi1-phi)),2)+pow(eta1-eta,2));
+	  double dR2=sqrt(pow(acos(cos(phi2-phi)),2)+pow(eta2-eta,2));
+	  double deta1=fabs(eta1-eta);
+	  double deta2=fabs(eta2-eta);
    for(int i=0;i<16;i++){
      mpt_alpha_t[i]=0;
      mpt_alpha_t_ave[i]=0;
-	 if((alpha < dR_upperbound[i+1]) || (alpha > (TMath::Pi()-dR_upperbound[i+1]))) mpt_alpha_t[i] =pt*cos(phi -phi1);
-	 if((alpha_ave < dR_upperbound[i+1]) || (alpha_ave > (TMath::Pi()-dR_upperbound[i+1]))) mpt_alpha_t_ave[i] =pt*cos(phi -phiave);
+	  if((alpha < dR_upperbound[i+1]) || (alpha > (TMath::Pi()-dR_upperbound[i+1]))) mpt_alpha_t[i] =pt*cos(phi -phi1);
+	  if((alpha_ave < dR_upperbound[i+1]) || (alpha_ave > (TMath::Pi()-dR_upperbound[i+1]))) mpt_alpha_t_ave[i] =pt*cos(phi -phiave);
      mpt_alpha[i]+=mpt_alpha_t[i];
      mpt_alpha_ave[i]+=mpt_alpha_t_ave[i];
 	 
@@ -777,14 +962,15 @@ TH1D::SetDefaultSumw2();
     
       mpt_dR_t[i]=0;
       mpt_dR_t_ave[i]=0;
-	  double dR1=sqrt(pow(acos(cos(phi1-phi)),2)+pow(eta1-eta,2));
-	  double dR2=sqrt(pow(acos(cos(phi2-phi)),2)+pow(eta2-eta,2));
+      mpt_dR_t_ave_smeared[i]=0;
 	  if((dR1 < dR_upperbound[i+1]) || (dR2 <   dR_upperbound[i+1])){
   	   mpt_dR_t[i] =pt*cos(phi -phi1);
-	   mpt_dR_t_ave[i]=pt*cos(phi-phiave);
+	    mpt_dR_t_ave[i]=pt*cos(phi-phiave);
+	    mpt_dR_t_ave_smeared[i]=smeared_pt*cos(phi-phiave);
 	  }
       mpt_dR[i]+=mpt_dR_t[i];
       mpt_dR_ave[i]+=mpt_dR_t_ave[i];
+      mpt_dR_ave_smeared[i]+=mpt_dR_t_ave_smeared[i];
       if(signal==1){
 	   mpt_dR_s[i]+=mpt_dR_t[i];
 	   mpt_dR_s_ave[i]+=mpt_dR_t_ave[i];
@@ -796,13 +982,11 @@ TH1D::SetDefaultSumw2();
 	
     for(int i=0;i<15;i++){
     
-      mpt_dphi_t[i]=0;
-      mpt_dphi_t_ave[i]=0;
-	  double dphi1=acos(cos(phi1-phi));
-	  double dphi2=acos(cos(phi2-phi));
-	  if((dphi1 < dR_upperbound[i+1])  || (dphi2 <   dR_upperbound[i+1])){
-  	   mpt_dphi_t[i] =pt*cos(phi -phi1);
-	   mpt_dphi_t_ave[i]=pt*cos(phi-phiave);
+    mpt_dphi_t[i]=0;
+    mpt_dphi_t_ave[i]=0;
+	  if(((dphi1 < dR_upperbound[i+1])  || (dphi2 <   dR_upperbound[i+1]))&& deta1<0.2&& deta2<0.2){
+  	  mpt_dphi_t[i] =pt*cos(phi -phi1);
+	    mpt_dphi_t_ave[i]=pt*cos(phi-phiave);
 	  }
       mpt_dphi[i]+=mpt_dphi_t[i];
       mpt_dphi_ave[i]+=mpt_dphi_t_ave[i];
@@ -818,9 +1002,7 @@ TH1D::SetDefaultSumw2();
     for(int i=0;i<29;i++){
       mpt_deta_t[i]=0;
       mpt_deta_t_ave[i]=0;
-	  double deta1=fabs(eta1-eta);
-	  double deta2=fabs(eta2-eta);
-	  if((deta1 < dR_upperbound[i+1]) || (deta2 <   dR_upperbound[i+1])){
+	  if(((deta1 < dR_upperbound[i+1]) || (deta2 <   dR_upperbound[i+1]))&& dphi1<0.2&& dphi2<0.2){
   	   mpt_deta_t[i] =pt*cos(phi -phi1);
 	   mpt_deta_t_ave[i]=pt*cos(phi-phiave);
 	  }
@@ -883,6 +1065,7 @@ TH1D::SetDefaultSumw2();
   nt_mpt_s_dR_ave->Fill(mpt_dR_s_ave);
   nt_mpt_b_dR_ave->Fill(mpt_dR_b_ave);
   nt_mpt_dR_ave->Fill(mpt_dR_ave);
+  nt_mpt_dR_ave_smeared->Fill(mpt_dR_ave_smeared);
   nt_mpt_tracks_dR_ave->Fill(mpt_dR_tracks_ave);
   nt_mpt_tracks_uncorr_dR_ave->Fill(mpt_dR_tracks_uncorr_ave);
   
@@ -898,7 +1081,7 @@ TH1D::SetDefaultSumw2();
   nt_mpt_tracks_deta_ave->Fill(mpt_deta_tracks_ave);
   nt_mpt_tracks_uncorr_deta_ave->Fill(mpt_deta_tracks_uncorr_ave);
   
-  float jtentry[]={pt1,eta1,phi1,pt2,eta2,phi2,pt3,eta3,phi3,dphi,ptratio,jetspz,jetspt,jetseta,jetsrap,jetsphi,jetspz_12,jetspt_12,jetseta_12,jetsrap_12,jetsphi_12,trkrap,mpt,mpt_s,mpt_b,mpt_tracks,mpt_tracks_ls,mpt_parts,mpt_tracks_uncorr,mpt_ave,mpt_b_ave,mpt_s_ave,mpt_tracks_ave,mpt_tracks_uncorr_ave,hfp,hfm,Npassingtrk,vz};
+  float jtentry[]={w_vz,fjet->pthat,pt1,eta1,phi1,pt2,eta2,phi2,pt3,eta3,phi3,dphi,ptratio,pt1_0_10,pt1_10_30,pt1_30_50,pt1_50_100,eta1_0_10,eta1_10_30,eta1_30_50,eta1_50_100,phi1_0_10,phi1_10_30,phi1_30_50,phi1_50_100,pt2_0_10,pt2_10_30,pt2_30_50,pt2_50_100,eta2_0_10,eta2_10_30,eta2_30_50,eta2_50_100,phi2_0_10,phi2_10_30,phi2_30_50,phi2_50_100,pt3_0_10,pt3_10_30,pt3_30_50,pt3_50_100,eta3_0_10,eta3_10_30,eta3_30_50,eta3_50_100,phi3_0_10,phi3_10_30,phi3_30_50,phi3_50_100,jetspz,jetspt,jetseta,jetsrap,jetsphi,jetspz_12,jetspt_12,jetseta_12,jetsrap_12,jetsphi_12,trkrap,mpt,mpt_s,mpt_b,mpt_tracks,mpt_tracks_ls,mpt_parts,mpt_tracks_uncorr,mpt_ave,mpt_b_ave,mpt_s_ave,mpt_tracks_ave,mpt_tracks_uncorr_ave,mpt_ave_smeared,hfp,hfm,Npassingtrk,vz,n_lead,n_sublead,n_lead_gen,n_sublead_gen,n_lead_s,n_sublead_s,n_lead_b,n_sublead_b};
   
  
   nt_jet->Fill(jtentry);
@@ -961,6 +1144,7 @@ TH1D::SetDefaultSumw2();
   nt_mpt_s_dR_ave->Write();
   nt_mpt_b_dR_ave->Write();
   nt_mpt_dR_ave->Write();
+  nt_mpt_dR_ave_smeared->Write();
   nt_mpt_tracks_dR_ave->Write();
   nt_mpt_tracks_uncorr_dR_ave->Write();
  outf->Close();
