@@ -1,36 +1,31 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Wed Nov 27 10:28:20 2013 by ROOT version 5.32/00
+// Wed Mar 12 21:23:22 2014 by ROOT version 5.32/00
 // from TTree trackTree/v1
-// found on file: /mnt/hadoop/cms/store/user/yenjie/HiForest_v27/Dijet50_HydjetDrum_v27_mergedV1.root
+// found on file: root://eoscms//eos/cms/store/caf/user/dgulhan/PYTHIA/prod22_ppTrack_tmping/pt80_pp2013_P01_prod22_v81_merged_forest_0.root
 //////////////////////////////////////////////////////////
 
-#ifndef trackTree_h
-#define trackTree_h
+#ifndef ppTrack_tmp_h
+#define ppTrack_tmp_h
 
 #include <TROOT.h>
 #include <TChain.h>
 #include <TFile.h>
-#include "HltTree.C"
+
+#include "HltTree_pp.C"
+#include "skimTree_pp.C"
 #include "HiTree.C"
 #include "t.C"
 #include "genPart.C"
 #include "hi.C"
-#include "skimTree.C"
-#include "pfTree.C"
 
 // Header file for the classes stored in the TTree if any.
 
 // Fixed size dimensions of array or collections stored in the TTree if any.
 
-class trackTree {
+class ppTrack_tmp {
 public :
    TTree          *fChain;   //!pointer to the analyzed TTree or TChain
-   // skimTree		  *fskim;
-   // HltTree		  *fhlt;
-   // t 	  *fjet;
-   // HiTree		  *fhi;
-   // genPart   *fgen;
    Int_t           fCurrent; //!current Tree number in a TChain
 
    // Declaration of leaf types
@@ -38,70 +33,113 @@ public :
    Int_t           nLumi;
    Int_t           nBX;
    Int_t           nRun;
+   Int_t           N;
    Int_t           nv;
    Float_t         vx[2];   //[nv]
    Float_t         vy[2];   //[nv]
    Float_t         vz[2];   //[nv]
+   Float_t         vxErr[2];   //[nv]
+   Float_t         vyErr[2];   //[nv]
+   Float_t         vzErr[2];   //[nv]
+   Int_t           nDaugher[2];   //[nv]
+   Int_t           nVtx;
+   Int_t           maxVtx;
+   Int_t           nTrkVtx[5];   //[nVtx]
+   Float_t         normChi2Vtx[5];   //[nVtx]
+   Float_t         sumPtVtx[5];   //[nVtx]
+   Float_t         xVtx[5];   //[nVtx]
+   Float_t         yVtx[5];   //[nVtx]
+   Float_t         zVtx[5];   //[nVtx]
+   Float_t         xVtxErr[5];   //[nVtx]
+   Float_t         yVtxErr[5];   //[nVtx]
+   Float_t         zVtxErr[5];   //[nVtx]
+   Float_t         vtxDist2D[5];   //[nVtx]
+   Float_t         vtxDist2DErr[5];   //[nVtx]
+   Float_t         vtxDist2DSig[5];   //[nVtx]
+    Float_t         vtxDist3DErr[5];   //[nVtx]
+   Float_t         vtxDist3DSig[5];   //[nVtx]
    Int_t           nTrk;
-   Float_t         trkPt[15000];   //[nTrk]
-   Float_t         trkPtError[15000];   //[nTrk]
-   Int_t           trkNHit[15000];   //[nTrk]
-   Int_t           trkNlayer[15000];   //[nTrk]
-   Float_t         trkEta[15000];   //[nTrk]
-   Float_t         trkPhi[15000];   //[nTrk]
-   Int_t           trkCharge[15000];   //[nTrk]
-   Bool_t          highPurity[15000];   //[nTrk]
-   Bool_t          highPuritySetWithPV[15000];   //[nTrk]
-   Float_t         trkChi2[15000];   //[nTrk]
-   Float_t         trkNdof[15000];   //[nTrk]
-   Float_t         trkDxy1[15000];   //[nTrk]
-   Float_t         trkDxyError1[15000];   //[nTrk]
-   Float_t         trkDz1[15000];   //[nTrk]
-   Float_t         trkDzError1[15000];   //[nTrk]
-   Bool_t          trkFake[15000];   //[nTrk]
-   Float_t         trkAlgo[15000];   //[nTrk]
-   Int_t           pfType[15000];   //[nTrk]
-   Float_t         pfCandPt[15000];   //[nTrk]
-   Float_t         pfSumEcal[15000];   //[nTrk]
-   Float_t         pfSumHcal[15000];   //[nTrk]
-   Float_t         trkStatus[15000];   //[nTrk]
+   Float_t         trkPt[3000];   //[nTrk]
+   Float_t         trkPtError[3000];   //[nTrk]
+   Int_t           trkNHit[3000];   //[nTrk]
+   Int_t           trkNlayer[3000];   //[nTrk]
+   Float_t         trkEta[3000];   //[nTrk]
+   Float_t         trkPhi[3000];   //[nTrk]
+   Int_t           trkCharge[3000];   //[nTrk]
+   Int_t           trkVtxIndex[3000];   //[nTrk]
+   Bool_t          highPurity[3000];   //[nTrk]
+   Bool_t          highPuritySetWithPV[3000];   //[nTrk]
+   Float_t         trkChi2[3000];   //[nTrk]
+   Float_t         trkNdof[3000];   //[nTrk]
+   Float_t         trkDxy1[3000];   //[nTrk]
+   Float_t         trkDxyError1[3000];   //[nTrk]
+   Float_t         trkDz1[3000];   //[nTrk]
+   Float_t         trkDzError1[3000];   //[nTrk]
+   Bool_t          trkFake[3000];   //[nTrk]
+   Float_t         trkAlgo[3000];   //[nTrk]
+   Int_t           pfType[3000];   //[nTrk]
+   Float_t         pfCandPt[3000];   //[nTrk]
+   Float_t         pfSumEcal[3000];   //[nTrk]
+   Float_t         pfSumHcal[3000];   //[nTrk]
+   Float_t         trkStatus[3000];   //[nTrk]
    Int_t           nParticle;
-   Float_t         pStatus[30000];   //[nParticle]
-   Float_t         pPId[30000];   //[nParticle]
-   Float_t         pEta[30000];   //[nParticle]
-   Float_t         pPhi[30000];   //[nParticle]
-   Float_t         pPt[30000];   //[nParticle]
-   Float_t         pAcc[30000];   //[nParticle]
-   Float_t         pAccPair[30000];   //[nParticle]
-   Float_t         pNRec[30000];   //[nParticle]
-   Int_t           pNHit[30000];   //[nParticle]
-   Float_t         mtrkPt[30000];   //[nParticle]
-   Float_t         mtrkPtError[30000];   //[nParticle]
-   Int_t           mtrkNHit[30000];   //[nParticle]
-   Int_t           mtrkNlayer[30000];   //[nParticle]
-   Int_t           mtrkNlayer3D[30000];   //[nParticle]
-   Int_t           mtrkQual[30000];   //[nParticle]
-   Float_t         mtrkChi2[30000];   //[nParticle]
-   Float_t         mtrkNdof[30000];   //[nParticle]
-   Float_t         mtrkDz1[30000];   //[nParticle]
-   Float_t         mtrkDzError1[30000];   //[nParticle]
-   Float_t         mtrkDxy1[30000];   //[nParticle]
-   Float_t         mtrkDxyError1[30000];   //[nParticle]
-   Float_t         mtrkAlgo[30000];   //[nParticle]
-   Int_t           mtrkPfType[30000];   //[nParticle]
-   Float_t         mtrkPfCandPt[30000];   //[nParticle]
-   Float_t         mtrkPfSumEcal[30000];   //[nParticle]
-   Float_t         mtrkPfSumHcal[30000];   //[nParticle]
+   Float_t         pStatus[3000];   //[nParticle]
+   Float_t         pPId[3000];   //[nParticle]
+   Float_t         pEta[3000];   //[nParticle]
+   Float_t         pPhi[3000];   //[nParticle]
+   Float_t         pPt[3000];   //[nParticle]
+   Float_t         pAcc[3000];   //[nParticle]
+   Float_t         pAccPair[3000];   //[nParticle]
+   Float_t         pNRec[3000];   //[nParticle]
+   Int_t           pNHit[3000];   //[nParticle]
+   Float_t         mtrkPt[3000];   //[nParticle]
+   Float_t         mtrkPtError[3000];   //[nParticle]
+   Int_t           mtrkNHit[3000];   //[nParticle]
+   Int_t           mtrkNlayer[3000];   //[nParticle]
+   Int_t           mtrkNlayer3D[3000];   //[nParticle]
+   Int_t           mtrkQual[3000];   //[nParticle]
+   Float_t         mtrkChi2[3000];   //[nParticle]
+   Float_t         mtrkNdof[3000];   //[nParticle]
+   Float_t         mtrkDz1[3000];   //[nParticle]
+   Float_t         mtrkDzError1[3000];   //[nParticle]
+   Float_t         mtrkDxy1[3000];   //[nParticle]
+   Float_t         mtrkDxyError1[3000];   //[nParticle]
+   Float_t         mtrkAlgo[3000];   //[nParticle]
+   Int_t           mtrkPfType[3000];   //[nParticle]
+   Float_t         mtrkPfCandPt[3000];   //[nParticle]
+   Float_t         mtrkPfSumEcal[3000];   //[nParticle]
+   Float_t         mtrkPfSumHcal[3000];   //[nParticle]
 
    // List of branches
    TBranch        *b_nEv;   //!
    TBranch        *b_nLumi;   //!
    TBranch        *b_nBX;   //!
    TBranch        *b_nRun;   //!
+   TBranch        *b_N;   //!
    TBranch        *b_nv;   //!
    TBranch        *b_vx;   //!
    TBranch        *b_vy;   //!
    TBranch        *b_vz;   //!
+   TBranch        *b_vxErr;   //!
+   TBranch        *b_vyErr;   //!
+   TBranch        *b_vzErr;   //!
+   TBranch        *b_nDaugher;   //!
+   TBranch        *b_nVtx;   //!
+   TBranch        *b_maxVtx;   //!
+   TBranch        *b_nTrkVtx;   //!
+   TBranch        *b_normChi2Vtx;   //!
+   TBranch        *b_sumPtVtx;   //!
+   TBranch        *b_xVtx;   //!
+   TBranch        *b_yVtx;   //!
+   TBranch        *b_zVtx;   //!
+   TBranch        *b_xVtxErr;   //!
+   TBranch        *b_yVtxErr;   //!
+   TBranch        *b_zVtxErr;   //!
+   TBranch        *b_vtxDist2D;   //!
+   TBranch        *b_vtxDist2DErr;   //!
+   TBranch        *b_vtxDist2DSig;   //!
+   TBranch        *b_vtxDist3DErr;   //!
+   TBranch        *b_vtxDist3DSig;   //!
    TBranch        *b_nTrk;   //!
    TBranch        *b_trkPt;   //!
    TBranch        *b_trkPtError;   //!
@@ -110,6 +148,7 @@ public :
    TBranch        *b_trkEta;   //!
    TBranch        *b_trkPhi;   //!
    TBranch        *b_trkCharge;   //!
+   TBranch        *b_trkVtxIndex;   //!
    TBranch        *b_highPurity;   //!
    TBranch        *b_highPuritySetWithPV;   //!
    TBranch        *b_trkChi2;   //!
@@ -153,30 +192,29 @@ public :
    TBranch        *b_mtrkPfSumEcal;   //!
    TBranch        *b_mtrkPfSumHcal;   //!
 
-   trackTree(TString infile,TTree *tree=0);
-
-   virtual ~trackTree();
+   ppTrack_tmp(TString infile,TTree *tree=0);
+   virtual ~ppTrack_tmp();
    virtual Int_t    Cut(Long64_t entry);
    virtual Int_t    GetEntry(Long64_t entry);
-   virtual Long64_t LoadTree(Long64_t entry);
    virtual Int_t    GetEntriesFast();
+   virtual Long64_t LoadTree(Long64_t entry);
    virtual void     Init(TTree *tree);
    virtual void     Loop();
    virtual Bool_t   Notify();
    virtual void     Show(Long64_t entry = -1);
-   virtual void             Close();
+      virtual void             Close();
+	  TFile *f;
 
-   TFile *f;
 };
 
 #endif
 
-#ifdef trackTree_cxx
-trackTree::trackTree(TString infile,TTree *tree)
+#ifdef ppTrack_tmp_cxx
+ppTrack_tmp::ppTrack_tmp(TString infile,TTree *tree)
 {
    f = TFile::Open(infile);
    cout<<infile.Data()<<endl;
-   tree = (TTree*) f->Get("anaTrack/trackTree");
+   tree = (TTree*) f->Get("ppTrack_tmp/trackTree");
    // fhi = new HiTree(infile);
    // fhlt = new HltTree(infile);
    // fskim = new skimTree(infile);
@@ -185,32 +223,27 @@ trackTree::trackTree(TString infile,TTree *tree)
    Init(tree);
 }
 
-trackTree::~trackTree()
+ppTrack_tmp::~ppTrack_tmp()
 {
    if (!fChain) return;
    delete fChain->GetCurrentFile();
 }
 
-Int_t trackTree::GetEntry(Long64_t entry)
+Int_t ppTrack_tmp::GetEntry(Long64_t entry)
 {
 // Read contents of entry.
    if (!fChain) return 0;
    return fChain->GetEntry(entry);
-   // return fhi->GetEntry(entry);
-   // return fhlt->GetEntry(entry);
-   // return fskim->GetEntry(entry);
-   // return fjet->GetEntry(entry);
-   // return fgen->GetEntry(entry);
 }
 
-Int_t trackTree::GetEntriesFast()
+Int_t ppTrack_tmp::GetEntriesFast()
 {
 // Read contents of entry.
    if (!fChain) return 0;
    return fChain->GetEntriesFast();
 }
 
-Long64_t trackTree::LoadTree(Long64_t entry)
+Long64_t ppTrack_tmp::LoadTree(Long64_t entry)
 {
 // Set the environment to read one entry
    if (!fChain) return -5;
@@ -223,7 +256,7 @@ Long64_t trackTree::LoadTree(Long64_t entry)
    return centry;
 }
 
-void trackTree::Init(TTree *tree)
+void ppTrack_tmp::Init(TTree *tree)
 {
    // The Init() function is called when the selector needs to initialize
    // a new tree or chain. Typically here the branch addresses and branch
@@ -243,10 +276,31 @@ void trackTree::Init(TTree *tree)
    fChain->SetBranchAddress("nLumi", &nLumi, &b_nLumi);
    fChain->SetBranchAddress("nBX", &nBX, &b_nBX);
    fChain->SetBranchAddress("nRun", &nRun, &b_nRun);
+   fChain->SetBranchAddress("N", &N, &b_N);
    fChain->SetBranchAddress("nv", &nv, &b_nv);
    fChain->SetBranchAddress("vx", vx, &b_vx);
    fChain->SetBranchAddress("vy", vy, &b_vy);
    fChain->SetBranchAddress("vz", vz, &b_vz);
+   fChain->SetBranchAddress("vxErr", vxErr, &b_vxErr);
+   fChain->SetBranchAddress("vyErr", vyErr, &b_vyErr);
+   fChain->SetBranchAddress("vzErr", vzErr, &b_vzErr);
+   fChain->SetBranchAddress("nDaugher", nDaugher, &b_nDaugher);
+   fChain->SetBranchAddress("nVtx", &nVtx, &b_nVtx);
+   fChain->SetBranchAddress("maxVtx", &maxVtx, &b_maxVtx);
+   fChain->SetBranchAddress("nTrkVtx", nTrkVtx, &b_nTrkVtx);
+   fChain->SetBranchAddress("normChi2Vtx", normChi2Vtx, &b_normChi2Vtx);
+   fChain->SetBranchAddress("sumPtVtx", sumPtVtx, &b_sumPtVtx);
+   fChain->SetBranchAddress("xVtx", xVtx, &b_xVtx);
+   fChain->SetBranchAddress("yVtx", yVtx, &b_yVtx);
+   fChain->SetBranchAddress("zVtx", zVtx, &b_zVtx);
+   fChain->SetBranchAddress("xVtxErr", xVtxErr, &b_xVtxErr);
+   fChain->SetBranchAddress("yVtxErr", yVtxErr, &b_yVtxErr);
+   fChain->SetBranchAddress("zVtxErr", zVtxErr, &b_zVtxErr);
+   fChain->SetBranchAddress("vtxDist2D", vtxDist2D, &b_vtxDist2D);
+   fChain->SetBranchAddress("vtxDist2DErr", vtxDist2DErr, &b_vtxDist2DErr);
+   fChain->SetBranchAddress("vtxDist2DSig", vtxDist2DSig, &b_vtxDist2DSig);
+   fChain->SetBranchAddress("vtxDist3DErr", vtxDist3DErr, &b_vtxDist3DErr);
+   fChain->SetBranchAddress("vtxDist3DSig", vtxDist3DSig, &b_vtxDist3DSig);
    fChain->SetBranchAddress("nTrk", &nTrk, &b_nTrk);
    fChain->SetBranchAddress("trkPt", trkPt, &b_trkPt);
    fChain->SetBranchAddress("trkPtError", trkPtError, &b_trkPtError);
@@ -255,6 +309,7 @@ void trackTree::Init(TTree *tree)
    fChain->SetBranchAddress("trkEta", trkEta, &b_trkEta);
    fChain->SetBranchAddress("trkPhi", trkPhi, &b_trkPhi);
    fChain->SetBranchAddress("trkCharge", trkCharge, &b_trkCharge);
+   fChain->SetBranchAddress("trkVtxIndex", trkVtxIndex, &b_trkVtxIndex);
    fChain->SetBranchAddress("highPurity", highPurity, &b_highPurity);
    fChain->SetBranchAddress("highPuritySetWithPV", highPuritySetWithPV, &b_highPuritySetWithPV);
    fChain->SetBranchAddress("trkChi2", trkChi2, &b_trkChi2);
@@ -300,7 +355,7 @@ void trackTree::Init(TTree *tree)
    Notify();
 }
 
-Bool_t trackTree::Notify()
+Bool_t ppTrack_tmp::Notify()
 {
    // The Notify() function is called when a new file is opened. This
    // can be either for a new TTree in a TChain or when when a new TTree
@@ -311,23 +366,22 @@ Bool_t trackTree::Notify()
    return kTRUE;
 }
 
-void trackTree::Show(Long64_t entry)
+void ppTrack_tmp::Show(Long64_t entry)
 {
 // Print contents of entry.
 // If entry is not specified, print current entry
    if (!fChain) return;
    fChain->Show(entry);
 }
-Int_t trackTree::Cut(Long64_t entry)
+Int_t ppTrack_tmp::Cut(Long64_t entry)
 {
 // This function may be called from Loop.
 // returns  1 if entry is accepted.
 // returns -1 otherwise.
    return 1;
 }
-
-void trackTree::Close()
+void ppTrack_tmp::Close()
 {
 f->Close();
 }
-#endif // #ifdef trackTree_cxx
+#endif // #ifdef ppTrack_tmp_cxx

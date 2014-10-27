@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Wed Mar 12 21:23:22 2014 by ROOT version 5.32/00
-// from TTree trackTree/v1
-// found on file: root://eoscms//eos/cms/store/caf/user/dgulhan/PYTHIA/prod22_ppTracking/pt80_pp2013_P01_prod22_v81_merged_forest_0.root
+// Fri Aug 22 06:56:50 2014 by ROOT version 5.32/00
+// from TTree ppTrack/v1
+// found on file: root://eoscms//eos/cms/store/group/phys_heavyions/dgulhan/ppJet80_PPForest_PPReco/PPHighPtData_ForestTag_PYTHIA_localdb_ppJEC_merged_forest_0.root
 //////////////////////////////////////////////////////////
 
 #ifndef ppTrack_h
@@ -12,16 +12,16 @@
 #include <TChain.h>
 #include <TFile.h>
 
+// Header file for the classes stored in the TTree if any.
+
+// Fixed size dimensions of array or collections stored in the TTree if any.
+
 #include "HltTree_pp.C"
 #include "skimTree_pp.C"
 #include "HiTree.C"
 #include "t.C"
 #include "genPart.C"
 #include "hi.C"
-
-// Header file for the classes stored in the TTree if any.
-
-// Fixed size dimensions of array or collections stored in the TTree if any.
 
 class ppTrack {
 public :
@@ -34,81 +34,52 @@ public :
    Int_t           nBX;
    Int_t           nRun;
    Int_t           N;
-   Int_t           nv;
-   Float_t         vx[2];   //[nv]
-   Float_t         vy[2];   //[nv]
-   Float_t         vz[2];   //[nv]
-   Float_t         vxErr[2];   //[nv]
-   Float_t         vyErr[2];   //[nv]
-   Float_t         vzErr[2];   //[nv]
-   Int_t           nDaugher[2];   //[nv]
    Int_t           nVtx;
-   Int_t           maxVtx;
-   Int_t           nTrkVtx[5];   //[nVtx]
-   Float_t         normChi2Vtx[5];   //[nVtx]
-   Float_t         sumPtVtx[5];   //[nVtx]
-   Float_t         xVtx[5];   //[nVtx]
-   Float_t         yVtx[5];   //[nVtx]
-   Float_t         zVtx[5];   //[nVtx]
-   Float_t         xVtxErr[5];   //[nVtx]
-   Float_t         yVtxErr[5];   //[nVtx]
-   Float_t         zVtxErr[5];   //[nVtx]
-   Float_t         vtxDist2D[5];   //[nVtx]
-   Float_t         vtxDist2DErr[5];   //[nVtx]
-   Float_t         vtxDist2DSig[5];   //[nVtx]
-    Float_t         vtxDist3DErr[5];   //[nVtx]
-   Float_t         vtxDist3DSig[5];   //[nVtx]
    Int_t           nTrk;
-   Float_t         trkPt[1000];   //[nTrk]
-   Float_t         trkPtError[1000];   //[nTrk]
-   Int_t           trkNHit[1000];   //[nTrk]
-   Int_t           trkNlayer[1000];   //[nTrk]
-   Float_t         trkEta[1000];   //[nTrk]
-   Float_t         trkPhi[1000];   //[nTrk]
-   Int_t           trkCharge[1000];   //[nTrk]
-   Int_t           trkVtxIndex[1000];   //[nTrk]
-   Bool_t          highPurity[1000];   //[nTrk]
-   Bool_t          highPuritySetWithPV[1000];   //[nTrk]
-   Float_t         trkChi2[1000];   //[nTrk]
-   Float_t         trkNdof[1000];   //[nTrk]
-   Float_t         trkDxy1[1000];   //[nTrk]
-   Float_t         trkDxyError1[1000];   //[nTrk]
-   Float_t         trkDz1[1000];   //[nTrk]
-   Float_t         trkDzError1[1000];   //[nTrk]
-   Bool_t          trkFake[1000];   //[nTrk]
-   Float_t         trkAlgo[1000];   //[nTrk]
-   Int_t           pfType[1000];   //[nTrk]
-   Float_t         pfCandPt[1000];   //[nTrk]
-   Float_t         pfSumEcal[1000];   //[nTrk]
-   Float_t         pfSumHcal[1000];   //[nTrk]
-   Float_t         trkStatus[1000];   //[nTrk]
-   Int_t           nParticle;
-   Float_t         pStatus[1000];   //[nParticle]
-   Float_t         pPId[162];   //[nParticle]
-   Float_t         pEta[162];   //[nParticle]
-   Float_t         pPhi[162];   //[nParticle]
-   Float_t         pPt[162];   //[nParticle]
-   Float_t         pAcc[162];   //[nParticle]
-   Float_t         pAccPair[162];   //[nParticle]
-   Float_t         pNRec[162];   //[nParticle]
-   Int_t           pNHit[162];   //[nParticle]
-   Float_t         mtrkPt[162];   //[nParticle]
-   Float_t         mtrkPtError[162];   //[nParticle]
-   Int_t           mtrkNHit[162];   //[nParticle]
-   Int_t           mtrkNlayer[162];   //[nParticle]
-   Int_t           mtrkNlayer3D[162];   //[nParticle]
-   Int_t           mtrkQual[162];   //[nParticle]
-   Float_t         mtrkChi2[162];   //[nParticle]
-   Float_t         mtrkNdof[162];   //[nParticle]
-   Float_t         mtrkDz1[162];   //[nParticle]
-   Float_t         mtrkDzError1[162];   //[nParticle]
-   Float_t         mtrkDxy1[162];   //[nParticle]
-   Float_t         mtrkDxyError1[162];   //[nParticle]
-   Float_t         mtrkAlgo[162];   //[nParticle]
-   Int_t           mtrkPfType[162];   //[nParticle]
-   Float_t         mtrkPfCandPt[162];   //[nParticle]
-   Float_t         mtrkPfSumEcal[162];   //[nParticle]
-   Float_t         mtrkPfSumHcal[162];   //[nParticle]
+   Int_t           maxPtVtx;
+   Int_t           maxMultVtx;
+   Int_t           nTrkVtx[10];   //[nVtx]
+   Float_t         normChi2Vtx[10];   //[nVtx]
+   Float_t         sumPtVtx[10];   //[nVtx]
+   Float_t         xVtx[10];   //[nVtx]
+   Float_t         yVtx[10];   //[nVtx]
+   Float_t         zVtx[10];   //[nVtx]
+   Float_t         xVtxErr[10];   //[nVtx]
+   Float_t         yVtxErr[10];   //[nVtx]
+   Float_t         zVtxErr[10];   //[nVtx]
+   Float_t         vtxDist2D[10];   //[nVtx]
+   Float_t         vtxDist2DErr[10];   //[nVtx]
+   Float_t         vtxDist2DSig[10];   //[nVtx]
+   Float_t         vtxDist3DErr[10];   //[nVtx]
+   Float_t         vtxDist3DSig[10];   //[nVtx]
+   Int_t           nVtxSim;
+   Float_t         xVtxSim[1];   //[nVtxSim]
+   Float_t         yVtxSim[1];   //[nVtxSim]
+   Float_t         zVtxSim[1];   //[nVtxSim]
+   Float_t         trkPt[3966];   //[nTrk]
+   Float_t         trkPtError[3966];   //[nTrk]
+   Int_t           trkNHit[3966];   //[nTrk]
+   Int_t           trkNlayer[3966];   //[nTrk]
+   Float_t         trkEta[3966];   //[nTrk]
+   Float_t         trkPhi[3966];   //[nTrk]
+   Int_t           trkCharge[3966];   //[nTrk]
+   Int_t           trkNVtx[3966];   //[nTrk]
+   Int_t           nTrkTimesnVtx;
+   Bool_t          trkAssocVtx[4222];   //[nTrkTimesnVtx]
+   Bool_t          highPurity[3966];   //[nTrk]
+   Bool_t          highPuritySetWithPV[3966];   //[nTrk]
+   Float_t         trkChi2[3966];   //[nTrk]
+   Float_t         trkNdof[3966];   //[nTrk]
+   Float_t         trkDxy1[3966];   //[nTrk]
+   Float_t         trkDxyError1[3966];   //[nTrk]
+   Float_t         trkDz1[3966];   //[nTrk]
+   Float_t         trkDzError1[3966];   //[nTrk]
+   Float_t         trkDzError2[3966];   //[nTrk]
+   Float_t         trkDxy2[3966];   //[nTrk]
+   Float_t         trkDz2[3966];   //[nTrk]
+   Float_t         trkDxyError2[3966];   //[nTrk]
+   Bool_t          trkFake[3966];   //[nTrk]
+   Float_t         trkAlgo[3966];   //[nTrk]
 
    // List of branches
    TBranch        *b_nEv;   //!
@@ -116,16 +87,10 @@ public :
    TBranch        *b_nBX;   //!
    TBranch        *b_nRun;   //!
    TBranch        *b_N;   //!
-   TBranch        *b_nv;   //!
-   TBranch        *b_vx;   //!
-   TBranch        *b_vy;   //!
-   TBranch        *b_vz;   //!
-   TBranch        *b_vxErr;   //!
-   TBranch        *b_vyErr;   //!
-   TBranch        *b_vzErr;   //!
-   TBranch        *b_nDaugher;   //!
    TBranch        *b_nVtx;   //!
-   TBranch        *b_maxVtx;   //!
+   TBranch        *b_nTrk;   //!
+   TBranch        *b_maxPtVtx;   //!
+   TBranch        *b_maxMultVtx;   //!
    TBranch        *b_nTrkVtx;   //!
    TBranch        *b_normChi2Vtx;   //!
    TBranch        *b_sumPtVtx;   //!
@@ -140,7 +105,10 @@ public :
    TBranch        *b_vtxDist2DSig;   //!
    TBranch        *b_vtxDist3DErr;   //!
    TBranch        *b_vtxDist3DSig;   //!
-   TBranch        *b_nTrk;   //!
+   TBranch        *b_nVtxSim;   //!
+   TBranch        *b_xVtxSim;   //!
+   TBranch        *b_yVtxSim;   //!
+   TBranch        *b_zVtxSim;   //!
    TBranch        *b_trkPt;   //!
    TBranch        *b_trkPtError;   //!
    TBranch        *b_trkNHit;   //!
@@ -148,7 +116,9 @@ public :
    TBranch        *b_trkEta;   //!
    TBranch        *b_trkPhi;   //!
    TBranch        *b_trkCharge;   //!
-   TBranch        *b_trkVtxIndex;   //!
+   TBranch        *b_trkNVtx;   //!
+   TBranch        *b_nTrkTimesnVtx;   //!
+   TBranch        *b_trkAssocVtx;   //!
    TBranch        *b_highPurity;   //!
    TBranch        *b_highPuritySetWithPV;   //!
    TBranch        *b_trkChi2;   //!
@@ -157,40 +127,12 @@ public :
    TBranch        *b_trkDxyError1;   //!
    TBranch        *b_trkDz1;   //!
    TBranch        *b_trkDzError1;   //!
+   TBranch        *b_trkDzError2;   //!
+   TBranch        *b_trkDxy2;   //!
+   TBranch        *b_trkDz2;   //!
+   TBranch        *b_trkDxyError2;   //!
    TBranch        *b_trkFake;   //!
    TBranch        *b_trkAlgo;   //!
-   TBranch        *b_pfType;   //!
-   TBranch        *b_pfCandPt;   //!
-   TBranch        *b_pfSumEcal;   //!
-   TBranch        *b_pfSumHcal;   //!
-   TBranch        *b_trkStatus;   //!
-   TBranch        *b_nParticle;   //!
-   TBranch        *b_pStatus;   //!
-   TBranch        *b_pPId;   //!
-   TBranch        *b_pEta;   //!
-   TBranch        *b_pPhi;   //!
-   TBranch        *b_pPt;   //!
-   TBranch        *b_pAcc;   //!
-   TBranch        *b_pAccPair;   //!
-   TBranch        *b_pNRec;   //!
-   TBranch        *b_pNHit;   //!
-   TBranch        *b_mtrkPt;   //!
-   TBranch        *b_mtrkPtError;   //!
-   TBranch        *b_mtrkNHit;   //!
-   TBranch        *b_mtrkNlayer;   //!
-   TBranch        *b_mtrkNlayer3D;   //!
-   TBranch        *b_mtrkQual;   //!
-   TBranch        *b_mtrkChi2;   //!
-   TBranch        *b_mtrkNdof;   //!
-   TBranch        *b_mtrkDz1;   //!
-   TBranch        *b_mtrkDzError1;   //!
-   TBranch        *b_mtrkDxy1;   //!
-   TBranch        *b_mtrkDxyError1;   //!
-   TBranch        *b_mtrkAlgo;   //!
-   TBranch        *b_mtrkPfType;   //!
-   TBranch        *b_mtrkPfCandPt;   //!
-   TBranch        *b_mtrkPfSumEcal;   //!
-   TBranch        *b_mtrkPfSumHcal;   //!
 
    ppTrack(TString infile,TTree *tree=0);
    virtual ~ppTrack();
@@ -222,6 +164,7 @@ ppTrack::ppTrack(TString infile,TTree *tree)
    // fgen = new genPart(infile);
    Init(tree);
 }
+
 
 ppTrack::~ppTrack()
 {
@@ -277,16 +220,10 @@ void ppTrack::Init(TTree *tree)
    fChain->SetBranchAddress("nBX", &nBX, &b_nBX);
    fChain->SetBranchAddress("nRun", &nRun, &b_nRun);
    fChain->SetBranchAddress("N", &N, &b_N);
-   fChain->SetBranchAddress("nv", &nv, &b_nv);
-   fChain->SetBranchAddress("vx", vx, &b_vx);
-   fChain->SetBranchAddress("vy", vy, &b_vy);
-   fChain->SetBranchAddress("vz", vz, &b_vz);
-   fChain->SetBranchAddress("vxErr", vxErr, &b_vxErr);
-   fChain->SetBranchAddress("vyErr", vyErr, &b_vyErr);
-   fChain->SetBranchAddress("vzErr", vzErr, &b_vzErr);
-   fChain->SetBranchAddress("nDaugher", nDaugher, &b_nDaugher);
    fChain->SetBranchAddress("nVtx", &nVtx, &b_nVtx);
-   fChain->SetBranchAddress("maxVtx", &maxVtx, &b_maxVtx);
+   fChain->SetBranchAddress("nTrk", &nTrk, &b_nTrk);
+   fChain->SetBranchAddress("maxPtVtx", &maxPtVtx, &b_maxPtVtx);
+   fChain->SetBranchAddress("maxMultVtx", &maxMultVtx, &b_maxMultVtx);
    fChain->SetBranchAddress("nTrkVtx", nTrkVtx, &b_nTrkVtx);
    fChain->SetBranchAddress("normChi2Vtx", normChi2Vtx, &b_normChi2Vtx);
    fChain->SetBranchAddress("sumPtVtx", sumPtVtx, &b_sumPtVtx);
@@ -299,9 +236,13 @@ void ppTrack::Init(TTree *tree)
    fChain->SetBranchAddress("vtxDist2D", vtxDist2D, &b_vtxDist2D);
    fChain->SetBranchAddress("vtxDist2DErr", vtxDist2DErr, &b_vtxDist2DErr);
    fChain->SetBranchAddress("vtxDist2DSig", vtxDist2DSig, &b_vtxDist2DSig);
+//    fChain->SetBranchAddress("vtxDist2D", vtxDist2D, &b_vtxDist2D);
    fChain->SetBranchAddress("vtxDist3DErr", vtxDist3DErr, &b_vtxDist3DErr);
    fChain->SetBranchAddress("vtxDist3DSig", vtxDist3DSig, &b_vtxDist3DSig);
-   fChain->SetBranchAddress("nTrk", &nTrk, &b_nTrk);
+   fChain->SetBranchAddress("nVtxSim", &nVtxSim, &b_nVtxSim);
+   fChain->SetBranchAddress("xVtxSim", &xVtxSim, &b_xVtxSim);
+   fChain->SetBranchAddress("yVtxSim", &yVtxSim, &b_yVtxSim);
+   fChain->SetBranchAddress("zVtxSim", &zVtxSim, &b_zVtxSim);
    fChain->SetBranchAddress("trkPt", trkPt, &b_trkPt);
    fChain->SetBranchAddress("trkPtError", trkPtError, &b_trkPtError);
    fChain->SetBranchAddress("trkNHit", trkNHit, &b_trkNHit);
@@ -309,7 +250,9 @@ void ppTrack::Init(TTree *tree)
    fChain->SetBranchAddress("trkEta", trkEta, &b_trkEta);
    fChain->SetBranchAddress("trkPhi", trkPhi, &b_trkPhi);
    fChain->SetBranchAddress("trkCharge", trkCharge, &b_trkCharge);
-   fChain->SetBranchAddress("trkVtxIndex", trkVtxIndex, &b_trkVtxIndex);
+   fChain->SetBranchAddress("trkNVtx", trkNVtx, &b_trkNVtx);
+   fChain->SetBranchAddress("nTrkTimesnVtx", &nTrkTimesnVtx, &b_nTrkTimesnVtx);
+   fChain->SetBranchAddress("trkAssocVtx", trkAssocVtx, &b_trkAssocVtx);
    fChain->SetBranchAddress("highPurity", highPurity, &b_highPurity);
    fChain->SetBranchAddress("highPuritySetWithPV", highPuritySetWithPV, &b_highPuritySetWithPV);
    fChain->SetBranchAddress("trkChi2", trkChi2, &b_trkChi2);
@@ -318,40 +261,12 @@ void ppTrack::Init(TTree *tree)
    fChain->SetBranchAddress("trkDxyError1", trkDxyError1, &b_trkDxyError1);
    fChain->SetBranchAddress("trkDz1", trkDz1, &b_trkDz1);
    fChain->SetBranchAddress("trkDzError1", trkDzError1, &b_trkDzError1);
+   fChain->SetBranchAddress("trkDzError2", trkDzError2, &b_trkDzError2);
+   fChain->SetBranchAddress("trkDxy2", trkDxy2, &b_trkDxy2);
+   fChain->SetBranchAddress("trkDz2", trkDz2, &b_trkDz2);
+   fChain->SetBranchAddress("trkDxyError2", trkDxyError2, &b_trkDxyError2);
    fChain->SetBranchAddress("trkFake", trkFake, &b_trkFake);
    fChain->SetBranchAddress("trkAlgo", trkAlgo, &b_trkAlgo);
-   fChain->SetBranchAddress("pfType", pfType, &b_pfType);
-   fChain->SetBranchAddress("pfCandPt", pfCandPt, &b_pfCandPt);
-   fChain->SetBranchAddress("pfSumEcal", pfSumEcal, &b_pfSumEcal);
-   fChain->SetBranchAddress("pfSumHcal", pfSumHcal, &b_pfSumHcal);
-   fChain->SetBranchAddress("trkStatus", trkStatus, &b_trkStatus);
-   fChain->SetBranchAddress("nParticle", &nParticle, &b_nParticle);
-   fChain->SetBranchAddress("pStatus", pStatus, &b_pStatus);
-   fChain->SetBranchAddress("pPId", pPId, &b_pPId);
-   fChain->SetBranchAddress("pEta", pEta, &b_pEta);
-   fChain->SetBranchAddress("pPhi", pPhi, &b_pPhi);
-   fChain->SetBranchAddress("pPt", pPt, &b_pPt);
-   fChain->SetBranchAddress("pAcc", pAcc, &b_pAcc);
-   fChain->SetBranchAddress("pAccPair", pAccPair, &b_pAccPair);
-   fChain->SetBranchAddress("pNRec", pNRec, &b_pNRec);
-   fChain->SetBranchAddress("pNHit", pNHit, &b_pNHit);
-   fChain->SetBranchAddress("mtrkPt", mtrkPt, &b_mtrkPt);
-   fChain->SetBranchAddress("mtrkPtError", mtrkPtError, &b_mtrkPtError);
-   fChain->SetBranchAddress("mtrkNHit", mtrkNHit, &b_mtrkNHit);
-   fChain->SetBranchAddress("mtrkNlayer", mtrkNlayer, &b_mtrkNlayer);
-   fChain->SetBranchAddress("mtrkNlayer3D", mtrkNlayer3D, &b_mtrkNlayer3D);
-   fChain->SetBranchAddress("mtrkQual", mtrkQual, &b_mtrkQual);
-   fChain->SetBranchAddress("mtrkChi2", mtrkChi2, &b_mtrkChi2);
-   fChain->SetBranchAddress("mtrkNdof", mtrkNdof, &b_mtrkNdof);
-   fChain->SetBranchAddress("mtrkDz1", mtrkDz1, &b_mtrkDz1);
-   fChain->SetBranchAddress("mtrkDzError1", mtrkDzError1, &b_mtrkDzError1);
-   fChain->SetBranchAddress("mtrkDxy1", mtrkDxy1, &b_mtrkDxy1);
-   fChain->SetBranchAddress("mtrkDxyError1", mtrkDxyError1, &b_mtrkDxyError1);
-   fChain->SetBranchAddress("mtrkAlgo", mtrkAlgo, &b_mtrkAlgo);
-   fChain->SetBranchAddress("mtrkPfType", mtrkPfType, &b_mtrkPfType);
-   fChain->SetBranchAddress("mtrkPfCandPt", mtrkPfCandPt, &b_mtrkPfCandPt);
-   fChain->SetBranchAddress("mtrkPfSumEcal", mtrkPfSumEcal, &b_mtrkPfSumEcal);
-   fChain->SetBranchAddress("mtrkPfSumHcal", mtrkPfSumHcal, &b_mtrkPfSumHcal);
    Notify();
 }
 
