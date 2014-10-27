@@ -263,13 +263,14 @@ void cumulative(int gensigbkgreco=3, int doMC=0, int index_var=2, bool doIntegra
  
  for(int ipt=0;ipt<npt;ipt++){ 
   if(!doMC){  
-   f[ipt] = TFile::Open(Form("/afs/cern.ch/user/d/dgulhan/workDir/missingPt/ntuples_PbPb_mptonly_20140325_v5/full_ntuple_hiForest_Jet80or95_GR_R_53_LV6_03Mar2014_1600CET_CMSSW_5_3_16_merged_pt%d_%d_akVs3Calo.root",(int)ptmin[ipt],(int)ptmax[ipt])); 
-   f_ref[ipt] = TFile::Open(Form("/afs/cern.ch/user/d/dgulhan/workDir/missingPt/ntuples_pp_mptonly_20140325_v4/full_ntuple_PP2013_HiForest_PromptReco_JsonPP_Jet80_PPReco_forestv82_pt%d_%d_ak3Calo.root",(int)ptmin[ipt],(int)ptmax[ipt])); 
+   // if(ipt==npt-1) f[ipt] = TFile::Open(Form("/afs/cern.ch/user/d/dgulhan/workDir/missingPt/ntuples_PbPb_20140428_lastptbinoldcorr//full_ntuple_HIRun2011-14Mar2014-v2-6lumi-jet80-forest-v4-merged_pt%d_%d_akVs3Calo_v2.root",(int)ptmin[ipt],(int)ptmax[ipt])); 
+   f[ipt] = TFile::Open(Form("/afs/cern.ch/user/d/dgulhan/workDir/missingPt/ntuples_PbPb_20140506_1p15M/full_ntuple_HIRun2011-14Mar2014-v2-6lumi-jet80-forest-v4ANDv9-merged_pt%d_%d_akVs3Calo_v2.root",(int)ptmin[ipt],(int)ptmax[ipt])); 
+   f_ref[ipt] = TFile::Open(Form("/afs/cern.ch/user/d/dgulhan/workDir/missingPt/ntuples_pp_20140428//full_ntuple_HiForest_pp_Jet80_v8_PP2013_HiForest_PromptReco_JsonPP_Jet80_PPReco_merged_forest_0_pt%d_%d_ak3Calo.root",(int)ptmin[ipt],(int)ptmax[ipt])); 
   }
   
   if(doMC){
-   f[ipt] = TFile::Open(Form("/afs/cern.ch/user/d/dgulhan/workDir/missingPt/ntuples_MC_mptonly_20140325_pthat120/full_ntuple_HydjetDrum_Pyquen_Dijet120_FOREST_Track8_Jet24_FixedPtHat_v0_pt%d_%d_akVs3Calo_doGenJet%d.root",(int)ptmin[ipt],(int)ptmax[ipt],doGenJet)); 
-   f_ref[ipt] = TFile::Open(Form("/afs/cern.ch/user/d/dgulhan/workDir/missingPt/ntuples_PYTHIA_mptonly_20140325_v5/full_ntuple_pt120_pp2013_P01_prod22_v81_merged_forest_0_pt%d_%d_ak3Calo_doGenJet%d.root",(int)ptmin[ipt],(int)ptmax[ipt],doGenJet)); 
+   f[ipt] = TFile::Open(Form("/afs/cern.ch/user/d/dgulhan/workDir/missingPt/ntuples_MC_20140428//full_ntuple_HydjetDrum_Pyquen_Dijet_FOREST_Track8_Jet24_FixedPtHatJES_v0_pt%d_%d_akVs3Calo_doGenJet0.root",(int)ptmin[ipt],(int)ptmax[ipt],doGenJet)); 
+   f_ref[ipt] = TFile::Open(Form("/afs/cern.ch/user/d/dgulhan/workDir/missingPt/ntuples_PYTHIA_20140429_multdiff/full_ntuple_HiForest_pt80_PYTHIA_ppReco_JECv85_merged_forest_0_pt%d_%d_ak3Calo_doGenJet1.root",(int)ptmin[ipt],(int)ptmax[ipt],doGenJet)); 
   }
  
   cout<<Form("nt_%s%s_%s%s",smpt[domp].Data(),skind[gensigbkgreco].Data(),svariable[index_var].Data(),strave.Data())<<endl; 
@@ -359,7 +360,7 @@ void cumulative(int gensigbkgreco=3, int doMC=0, int index_var=2, bool doIntegra
    h[ipt][ialpha][icent]=new TH1D(Form("h_%d_%d_%d",ialpha,ipt,icent),"",100000,-100000,100000);
    h_stat[ipt][ialpha][icent]=new TH1D(Form("h_stat_%d_%d_%d",ialpha,ipt,icent),"",100000,-100000,100000);
    if(!doMC)t[ipt]->Draw(Form("%s>>h_%d_%d_%d",sintegrate[ialpha][ipt].Data(),ialpha,ipt,icent),Form("pt1>%d && pt2>%d && abs(eta1)<%.1f && abs(eta2)<%.1f && dphi>(5*TMath::Pi()/6) && cent>=%d && cent<%d && ((pt1-pt2)/(pt2+pt1))>=%.2f && ((pt1-pt2)/(pt2+pt1))<%.2f && abs(vz)<15 && pt3>50",jetpt1,jetpt2,etadijet,etadijet, cent_min[icent],cent_max[icent],Ajmin[iAj],Ajmax[iAj]),"");
-   else t[ipt]->Draw(Form("%s>>h_%d_%d_%d",sintegrate[ialpha][ipt].Data(),ialpha,ipt,icent),Form("cent_weight*(pt1>%d && pt2>%d && abs(eta1)<%.1f && abs(eta2)<%.1f && dphi>(5*TMath::Pi()/6) && cent>=%d && cent<%d && ((pt1-pt2)/(pt2+pt1))>=%.2f && ((pt1-pt2)/(pt2+pt1))<%.2f && abs(vz)<15 && pt3>50)",jetpt1,jetpt2,etadijet,etadijet, cent_min[icent],cent_max[icent],Ajmin[iAj],Ajmax[iAj]),"");
+   else t[ipt]->Draw(Form("%s>>h_%d_%d_%d",sintegrate[ialpha][ipt].Data(),ialpha,ipt,icent),Form("weight*cent_weight*(pt1>%d && pt2>%d && abs(eta1)<%.1f && abs(eta2)<%.1f && dphi>(5*TMath::Pi()/6) && cent>=%d && cent<%d && ((pt1-pt2)/(pt2+pt1))>=%.2f && ((pt1-pt2)/(pt2+pt1))<%.2f && abs(vz)<15 && pt3>50)",jetpt1,jetpt2,etadijet,etadijet, cent_min[icent],cent_max[icent],Ajmin[iAj],Ajmax[iAj]),"");
     mpt=h[ipt][ialpha][icent]->GetMean(); 
     mpterr=h[ipt][ialpha][icent]->GetMeanError();
    
@@ -367,9 +368,9 @@ void cumulative(int gensigbkgreco=3, int doMC=0, int index_var=2, bool doIntegra
    mpterr=h[ipt][ialpha][icent]->GetMeanError();
    
    if(ipt==npt-1){
-    if(!doMC)t[ipt]->Draw(Form("%s>>h_stat_%d_%d_%d",sintegrate_stat[ialpha][ipt].Data(),ialpha,ipt,icent),Form("pt1>%d && pt2>%d && abs(eta1)<%.1f && abs(eta2)<%.1f && dphi>(5*TMath::Pi()/6) && cent>=%d && cent<%d && ((pt1-pt2)/(pt2+pt1))>=%.2f && ((pt1-pt2)/(pt2+pt1))<%.2f && abs(vz)<15 && pt3>50)",jetpt1,jetpt2,etadijet,etadijet, cent_min[icent],cent_max[icent],Ajmin[iAj],Ajmax[iAj]),"");
-    else t[ipt]->Draw(Form("%s>>h_stat_%d_%d_%d",sintegrate_stat[ialpha][ipt].Data(),ialpha,ipt,icent),Form("cent_weight*(pt1>%d && pt2>%d && abs(eta1)<%.1f && abs(eta2)<%.1f && dphi>(5*TMath::Pi()/6) && cent>=%d && cent<%d && ((pt1-pt2)/(pt2+pt1))>=%.2f && ((pt1-pt2)/(pt2+pt1))<%.2f && abs(vz)<15 && pt3>50))",jetpt1,jetpt2,etadijet,etadijet, cent_min[icent],cent_max[icent],Ajmin[iAj],Ajmax[iAj]),""); 
-    mpterr=h[ipt][ialpha][icent]->GetMeanError();
+    if(!doMC)t[ipt]->Draw(Form("%s>>h_stat_%d_%d_%d",sintegrate_stat[ialpha][ipt].Data(),ialpha,ipt,icent),Form("(pt1>%d && pt2>%d && abs(eta1)<%.1f && abs(eta2)<%.1f && dphi>(5*TMath::Pi()/6) && cent>=%d && cent<%d && ((pt1-pt2)/(pt2+pt1))>=%.2f && ((pt1-pt2)/(pt2+pt1))<%.2f && abs(vz)<15 && pt3>50)",jetpt1,jetpt2,etadijet,etadijet, cent_min[icent],cent_max[icent],Ajmin[iAj],Ajmax[iAj]),"");
+    else t[ipt]->Draw(Form("%s>>h_stat_%d_%d_%d",sintegrate_stat[ialpha][ipt].Data(),ialpha,ipt,icent),Form("weight*cent_weight*(pt1>%d && pt2>%d && abs(eta1)<%.1f && abs(eta2)<%.1f && dphi>(5*TMath::Pi()/6) && cent>=%d && cent<%d && ((pt1-pt2)/(pt2+pt1))>=%.2f && ((pt1-pt2)/(pt2+pt1))<%.2f && abs(vz)<15 && pt3>50)",jetpt1,jetpt2,etadijet,etadijet, cent_min[icent],cent_max[icent],Ajmin[iAj],Ajmax[iAj]),""); 
+    mpterr=h[ipt][ialpha][icent]->GetMeanError(); 
     mpterr_cum=h[ipt][ialpha][icent]->GetMeanError();
     mpt_cum=h_stat[ipt][ialpha][icent]->GetMean();
    }

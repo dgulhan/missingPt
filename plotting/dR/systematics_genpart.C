@@ -119,13 +119,13 @@ void drawPatch(float x1, float y1, float x2, float y2){
 }
 
 
-void cumulative(int gensigbkgreco=3, int doMC=0, int index_var=2, bool doIntegrate=true,  int iAj=0, int doAve=1){
+void cumulative(int gensigbkgreco=0, int doMC=1, int index_var=3, bool doIntegrate=false,  int iAj=2, int doAve=1){
  TH1D::SetDefaultSumw2(); 
  bool doCompareGenReco= false;
  int domp=0;
- int ncent=1;  
+ int ncent=2;  
  bool doGenJet=false;
- double etadijet=0.5;
+ double etadijet=0.6;
  TString smpt[]={"mpt","mp","mpt_boosted"};
  TString skind[]={"","_s","_b","_tracks","_tracks_uncorr","_parts"};
  TString spart[]={"gen. part.","gen. sig.","gen. part.","corr reco. part.","uncorr. reco.","gen. part."};
@@ -190,6 +190,9 @@ void cumulative(int gensigbkgreco=3, int doMC=0, int index_var=2, bool doIntegra
  TString sintegrate[nalpha+1][npt];
  TString sintegrate_stat[nalpha+1][npt];
  TString s[npt];
+ TString sintegrate_ref[nalpha+1][npt];
+ TString sintegrate_stat_ref[nalpha+1][npt];
+ TString s_ref[npt];
 
  for(int ipt=0; ipt<npt;ipt++){
   s[ipt]="";
@@ -239,11 +242,10 @@ void cumulative(int gensigbkgreco=3, int doMC=0, int index_var=2, bool doIntegra
   }
   
   if(doMC){
-   f[ipt] = TFile::Open(Form("../../ntuples_PYTHIA_20141007_corrJEC_trkmax//full_ntuple_PYTHIA_PPForest_HIReco_pthat_pt%d_%d_ak3Calo_doGenJet0.root",(int)ptmin[ipt],(int)ptmax[ipt],doGenJet)); 
-   f_ref[ipt] = TFile::Open(Form("../../ntuples_PYTHIA_20141006//full_ntuple_PYTHIA_PPForest_HIReco_pthat_pt%d_%d_ak3Calo_doGenJet1.root",(int)ptmin[ipt],(int)ptmax[ipt],doGenJet)); 
-   
-   // f[ipt] = TFile::Open(Form("../../../2014_07_04/ntuples_PYTHIA_20140429_multdiff/full_ntuple_HiForest_pt80_PYTHIA_ppReco_JECv85_merged_forest_0_pt%d_%d_ak3Calo_doGenJet0.root",(int)ptmin[ipt],(int)ptmax[ipt],doGenJet)); 
-   // f_ref[ipt] = TFile::Open(Form("../../../2014_07_04/ntuples_PYTHIA_20140429_multdiff/full_ntuple_pt80_pp2013_P01_prod22_v81_merged_forest_0_pt%d_%d_ak3Calo_doGenJet1.root",(int)ptmin[ipt],(int)ptmax[ipt],doGenJet)); 
+   // f[ipt] = TFile::Open(Form("/data/dgulhan/missingPt/2014_07_04/ntuples_MC_20140428/full_ntuple_HydjetDrum_Pyquen_Dijet_FOREST_Track8_Jet24_FixedPtHatJES_v0_pt%d_%d_akVs3Calo_doGenJet0.root",(int)ptmin[ipt],(int)ptmax[ipt],doGenJet)); 
+   // f_ref[ipt] = TFile::Open(Form("/data/dgulhan/missingPt/2014_07_04/ntuples_MC_20140428/full_ntuple_HydjetDrum_Pyquen_Dijet_FOREST_Track8_Jet24_FixedPtHatJES_v0_pt%d_%d_akVs3Calo_doGenJet1.root",(int)ptmin[ipt],(int)ptmax[ipt],doGenJet)); 
+   f[ipt] = TFile::Open(Form("../../ntuples_MC_20141003/PYTHIA_HYDJET_pt%d_%d_merged_private_official.root",(int)ptmin[ipt],(int)ptmax[ipt])); 
+   f_ref[ipt] = TFile::Open(Form("../../ntuples_MC_20141003/PYTHIA_HYDJET_pt%d_%d_merged_private_official_genjet.root",(int)ptmin[ipt],(int)ptmax[ipt])); 
   }
  
   cout<<Form("nt_%s%s_%s%s",smpt[domp].Data(),skind[gensigbkgreco].Data(),svariable[index_var].Data(),strave.Data())<<endl; 
@@ -261,8 +263,8 @@ void cumulative(int gensigbkgreco=3, int doMC=0, int index_var=2, bool doIntegra
  cout<<Form("nt_%s%s_%s%s",smpt[domp].Data(),skind[gensigbkgreco].Data(),svariable[index_var].Data(),strave.Data())<<endl; 
 
   cout<<Form("nt_%s%s%s",smpt[domp].Data(),skind[gensigbkgreco].Data(),strave.Data())<<endl;
-  if(index_var==0) t_ref[ipt]=(TTree*)f_ref[ipt]->Get(Form("nt_%s%s%s",smpt[domp].Data(),skind[gensigbkgreco].Data(),strave.Data()));
-  else t_ref[ipt]=(TTree*)f_ref[ipt]->Get(Form("nt_%s%s_%s%s",smpt[domp].Data(),skind[gensigbkgreco].Data(),svariable[index_var].Data(),strave.Data()));
+  if(index_var==0) t_ref[ipt]=(TTree*)f_ref[ipt]->Get(Form("nt_%s%s%s",smpt[domp].Data(),skind[0].Data(),strave.Data()));
+  else t_ref[ipt]=(TTree*)f_ref[ipt]->Get(Form("nt_%s%s_%s%s",smpt[domp].Data(),skind[0].Data(),svariable[index_var].Data(),strave.Data()));
   t_jet_ref[ipt]=(TTree*)f_ref[ipt]->Get("nt_jet");
   t_ref[ipt]->AddFriend(t_jet_ref[ipt]);
   
@@ -282,7 +284,6 @@ void cumulative(int gensigbkgreco=3, int doMC=0, int index_var=2, bool doIntegra
     if(ialpha<nalpha/2 && ialpha>0) sintegrate[ialpha][ipt]=Form("-%s_%d+%s_%d",svariable[index_var].Data(),2*ialpha+1,svariable[index_var].Data(),2*(ialpha-1)+1);
     else if(ialpha==0)sintegrate[ialpha][ipt]=Form("-%s_%d",svariable[index_var].Data(),ialpha+1);
     else  sintegrate[ialpha][ipt]=Form("-%s%s%s+%s_%d",smpt[domp].Data(),skind[gensigbkgreco].Data(),strave.Data(),svariable[index_var].Data(),nalpha-1);
-    
     if(ialpha<nalpha/2 && ialpha>0) sintegrate_stat[ialpha][ipt]=Form("-%s_%d+%s_%d",svariable[index_var].Data(),2*ialpha+1,svariable[index_var].Data(),2*(ialpha-1)+1);
     else if(ialpha==0)sintegrate_stat[ialpha][ipt]=Form("-%s_%d",svariable[index_var].Data(),ialpha+1);
     else  sintegrate_stat[ialpha][ipt]=Form("-%s%s%s+%s_%d",smpt[domp].Data(),skind[gensigbkgreco].Data(),strave.Data(),svariable[index_var].Data(),nalpha-1);
@@ -290,16 +291,29 @@ void cumulative(int gensigbkgreco=3, int doMC=0, int index_var=2, bool doIntegra
     if(ialpha<nalpha/2 && ialpha>0) sintegrate[ialpha][ipt]=Form("-%s_%d+%s_%d",svariable[index_var].Data(),2*ialpha+1,svariable[index_var].Data(),2*(ialpha-1)+1);
     else if(ialpha==0)sintegrate[ialpha][ipt]=Form("-%s_%d",svariable[index_var].Data(),ialpha+1);
     else  sintegrate[ialpha][ipt]=Form("-%s%s%s+%s_%d",smpt[domp].Data(),skind[gensigbkgreco].Data(),strave.Data(),svariable[index_var].Data(),nalpha-1);
+    }
+	if(ipt==npt-1){
+
+	if(ialpha<nalpha/2 && ialpha>0) sintegrate_ref[ialpha][ipt]=Form("-%s_%d+%s_%d",svariable[index_var].Data(),2*ialpha+1,svariable[index_var].Data(),2*(ialpha-1)+1);
+    else if(ialpha==0)sintegrate_ref[ialpha][ipt]=Form("-%s_%d",svariable[index_var].Data(),ialpha+1);
+    else  sintegrate_ref[ialpha][ipt]=Form("-%s%s%s+%s_%d",smpt[domp].Data(),skind[0].Data(),strave.Data(),svariable[index_var].Data(),nalpha-1);
+    if(ialpha<nalpha/2 && ialpha>0) sintegrate_stat_ref[ialpha][ipt]=Form("-%s_%d+%s_%d",svariable[index_var].Data(),2*ialpha+1,svariable[index_var].Data(),2*(ialpha-1)+1);
+    else if(ialpha==0)sintegrate_stat_ref[ialpha][ipt]=Form("-%s_%d",svariable[index_var].Data(),ialpha+1);
+    else  sintegrate_stat_ref[ialpha][ipt]=Form("-%s%s%s+%s_%d",smpt[domp].Data(),skind[0].Data(),strave.Data(),svariable[index_var].Data(),nalpha-1);
+   }else{
+    if(ialpha<nalpha/2 && ialpha>0) sintegrate_ref[ialpha][ipt]=Form("-%s_%d+%s_%d",svariable[index_var].Data(),2*ialpha+1,svariable[index_var].Data(),2*(ialpha-1)+1);
+    else if(ialpha==0)sintegrate_ref[ialpha][ipt]=Form("-%s_%d",svariable[index_var].Data(),ialpha+1);
+    else  sintegrate_ref[ialpha][ipt]=Form("-%s%s%s+%s_%d",smpt[domp].Data(),skind[0].Data(),strave.Data(),svariable[index_var].Data(),nalpha-1);
    }
    }
    h_ref[ipt][ialpha][icent]=new TH1D(Form("h_ref_%d_%d_%d",ialpha,ipt,icent),"",100000,-100000,100000);
-   t_ref[ipt]->Draw(Form("%s>>h_ref_%d_%d_%d",sintegrate[ialpha][ipt].Data(),ialpha,ipt,icent),Form("weight*(pthat>50)*(pt1>%d && pt2>%d && abs(eta1)<%.1f && abs(eta2)<%.1f && dphi>(5*TMath::Pi()/6)&& ((pt1-pt2)/(pt2+pt1))>=%.2f && ((pt1-pt2)/(pt2+pt1))<%.2f && abs(vz)<15)",jetpt1,jetpt2,etadijet,etadijet,Ajmin[iAj],Ajmax[iAj]),"");
+   t_ref[ipt]->Draw(Form("%s>>h_ref_%d_%d_%d",sintegrate_ref[ialpha][ipt].Data(),ialpha,ipt,icent),Form("cent_weight*weight*(pthat>80)*(pt1>%d && pt2>%d && abs(eta1)<%.1f && abs(eta2)<%.1f && dphi>(5*TMath::Pi()/6)&& ((pt1-pt2)/(pt2+pt1))>=%.2f && ((pt1-pt2)/(pt2+pt1))<%.2f && abs(vz)<15 && cent>=%d && cent<%d)",jetpt1,jetpt2,etadijet,etadijet,Ajmin[iAj],Ajmax[iAj],cent_min[icent],cent_max[icent]),"");
    
    mpt_ref[ipt][ialpha][icent]=h_ref[ipt][ialpha][icent]->GetMean();
    mpterr_ref[ipt][ialpha][icent]=h_ref[ipt][ialpha][icent]->GetMeanError();
    if(ipt==npt-1){
     h_ref_stat[ipt][ialpha][icent]=new TH1D(Form("h_ref_stat_%d_%d_%d",ialpha,ipt,icent),"",100000,-100000,100000);
-    t_ref[ipt]->Draw(Form("%s>>h_ref_stat_%d_%d_%d",sintegrate_stat[ialpha][ipt].Data(),ialpha,ipt,icent),Form("weight*(pthat>50)*(pt1>%d && pt2>%d && abs(eta1)<%.1f && abs(eta2)<%.1f && dphi>(5*TMath::Pi()/6)&& ((pt1-pt2)/(pt2+pt1))>=%.2f && ((pt1-pt2)/(pt2+pt1))<%.2f && abs(vz)<15)",jetpt1,jetpt2,etadijet,etadijet,Ajmin[iAj],Ajmax[iAj]),"");
+    t_ref[ipt]->Draw(Form("%s>>h_ref_stat_%d_%d_%d",sintegrate_stat_ref[ialpha][ipt].Data(),ialpha,ipt,icent),Form("cent_weight*weight*(pthat>80)*(pt1>%d && pt2>%d && abs(eta1)<%.1f && abs(eta2)<%.1f && dphi>(5*TMath::Pi()/6)&& ((pt1-pt2)/(pt2+pt1))>=%.2f && ((pt1-pt2)/(pt2+pt1))<%.2f && abs(vz)<15 && cent>=%d && cent<%d)",jetpt1,jetpt2,etadijet,etadijet,Ajmin[iAj],Ajmax[iAj],cent_min[icent],cent_max[icent]),"");
     mpterr_ref[ipt][ialpha][icent]=h_ref_stat[ipt][ialpha][icent]->GetMeanError();
    }
    
@@ -334,8 +348,8 @@ void cumulative(int gensigbkgreco=3, int doMC=0, int index_var=2, bool doIntegra
   for(int ialpha=0;ialpha<nalpha/2+1;ialpha++ ){
    h[ipt][ialpha][icent]=new TH1D(Form("h_%d_%d_%d",ialpha,ipt,icent),"",100000,-100000,100000);
    h_stat[ipt][ialpha][icent]=new TH1D(Form("h_stat_%d_%d_%d",ialpha,ipt,icent),"",100000,-100000,100000);
-   if(!doMC)t[ipt]->Draw(Form("%s>>h_%d_%d_%d",sintegrate[ialpha][ipt].Data(),ialpha,ipt,icent),Form("pt1>%d && pt2>%d && abs(eta1)<%.1f && abs(eta2)<%.1f && dphi>(5*TMath::Pi()/6) && ((pt1-pt2)/(pt2+pt1))>=%.2f && ((pt1-pt2)/(pt2+pt1))<%.2f && abs(vz)<15",jetpt1,jetpt2,etadijet,etadijet,Ajmin[iAj],Ajmax[iAj]),"");
-   else t[ipt]->Draw(Form("%s>>h_%d_%d_%d",sintegrate[ialpha][ipt].Data(),ialpha,ipt,icent),Form("weight*(pthat>50)*(pt1>%d && pt2>%d && abs(eta1)<%.1f && abs(eta2)<%.1f && dphi>(5*TMath::Pi()/6) && ((pt1-pt2)/(pt2+pt1))>=%.2f && ((pt1-pt2)/(pt2+pt1))<%.2f && abs(vz)<15)",jetpt1,jetpt2,etadijet,etadijet,Ajmin[iAj],Ajmax[iAj]),"");
+   if(!doMC)t[ipt]->Draw(Form("%s>>h_%d_%d_%d",sintegrate[ialpha][ipt].Data(),ialpha,ipt,icent),Form("pt1>%d && pt2>%d && abs(eta1)<%.1f && abs(eta2)<%.1f && dphi>(5*TMath::Pi()/6) && cent>=%d && cent<%d && ((pt1-pt2)/(pt2+pt1))>=%.2f && ((pt1-pt2)/(pt2+pt1))<%.2f && abs(vz)<15",jetpt1,jetpt2,etadijet,etadijet, cent_min[icent],cent_max[icent],Ajmin[iAj],Ajmax[iAj]),"");
+   else t[ipt]->Draw(Form("%s>>h_%d_%d_%d",sintegrate[ialpha][ipt].Data(),ialpha,ipt,icent),Form("cent_weight*weight*(pthat>80)*(pt1>%d && pt2>%d && abs(eta1)<%.1f && abs(eta2)<%.1f && dphi>(5*TMath::Pi()/6) && cent>=%d && cent<%d && ((pt1-pt2)/(pt2+pt1))>=%.2f && ((pt1-pt2)/(pt2+pt1))<%.2f && abs(vz)<15)",jetpt1,jetpt2,etadijet,etadijet, cent_min[icent],cent_max[icent],Ajmin[iAj],Ajmax[iAj]),"");
     mpt=h[ipt][ialpha][icent]->GetMean(); 
     mpterr=h[ipt][ialpha][icent]->GetMeanError();
    
@@ -343,8 +357,8 @@ void cumulative(int gensigbkgreco=3, int doMC=0, int index_var=2, bool doIntegra
    mpterr=h[ipt][ialpha][icent]->GetMeanError();
    
    if(ipt==npt-1){
-    if(!doMC)t[ipt]->Draw(Form("%s>>h_stat_%d_%d_%d",sintegrate_stat[ialpha][ipt].Data(),ialpha,ipt,icent),Form("pt1>%d && pt2>%d && abs(eta1)<%.1f && abs(eta2)<%.1f && dphi>(5*TMath::Pi()/6) && ((pt1-pt2)/(pt2+pt1))>=%.2f && ((pt1-pt2)/(pt2+pt1))<%.2f && abs(vz)<15",jetpt1,jetpt2,etadijet,etadijet,Ajmin[iAj],Ajmax[iAj]),"");
-    else t[ipt]->Draw(Form("%s>>h_stat_%d_%d_%d",sintegrate_stat[ialpha][ipt].Data(),ialpha,ipt,icent),Form("weight*(pthat>50)*(pt1>%d && pt2>%d && abs(eta1)<%.1f && abs(eta2)<%.1f && dphi>(5*TMath::Pi()/6) && ((pt1-pt2)/(pt2+pt1))>=%.2f && ((pt1-pt2)/(pt2+pt1))<%.2f && abs(vz)<15)",jetpt1,jetpt2,etadijet,etadijet,Ajmin[iAj],Ajmax[iAj]),""); 
+    if(!doMC)t[ipt]->Draw(Form("%s>>h_stat_%d_%d_%d",sintegrate_stat[ialpha][ipt].Data(),ialpha,ipt,icent),Form("pt1>%d && pt2>%d && abs(eta1)<%.1f && abs(eta2)<%.1f && dphi>(5*TMath::Pi()/6) && cent>=%d && cent<%d && ((pt1-pt2)/(pt2+pt1))>=%.2f && ((pt1-pt2)/(pt2+pt1))<%.2f && abs(vz)<15",jetpt1,jetpt2,etadijet,etadijet, cent_min[icent],cent_max[icent],Ajmin[iAj],Ajmax[iAj]),"");
+    else t[ipt]->Draw(Form("%s>>h_stat_%d_%d_%d",sintegrate_stat[ialpha][ipt].Data(),ialpha,ipt,icent),Form("cent_weight*weight*(pthat>80)*(pt1>%d && pt2>%d && abs(eta1)<%.1f && abs(eta2)<%.1f && dphi>(5*TMath::Pi()/6) && cent>=%d && cent<%d && ((pt1-pt2)/(pt2+pt1))>=%.2f && ((pt1-pt2)/(pt2+pt1))<%.2f && abs(vz)<15)",jetpt1,jetpt2,etadijet,etadijet, cent_min[icent],cent_max[icent],Ajmin[iAj],Ajmax[iAj]),""); 
     mpterr=h_stat[ipt][ialpha][icent]->GetMeanError();
    }
    mpt_diff=mpt-mpt_ref[ipt][ialpha][icent];
@@ -408,8 +422,8 @@ void cumulative(int gensigbkgreco=3, int doMC=0, int index_var=2, bool doIntegra
   double graphx[hmpt_vs_alpha_diff[npt-1][0]->GetNbinsX()];
   double graphxerr[hmpt_vs_alpha_diff[npt-1][0]->GetNbinsX()];
   
-  TCanvas *c1 = new TCanvas("c1","",(ncent)*300,800);
-  makeMultiPanelCanvas(c1,ncent,3,0.0,0.0,0.12,0.12,0.02);
+  TCanvas *c1 = new TCanvas("c1","",(ncent)*300,1050);
+  makeMultiPanelCanvas(c1,ncent,3,0.0,0.0,0.2,0.2,0.02);
  TH1D * empty=new TH1D("empty",Form(";%s;<#slash{p}_{T}^{#parallel}> (GeV)",axistitle[index_var].Data()),nalpha/2+1,frac);
  TH1D * empty2=new TH1D("empty2",Form(";%s;<#slash{p}_{T}^{#parallel}> (GeV)",axistitle[index_var].Data()),nalpha/2+1,frac);
  empty->Fill(0.5,1000); 
@@ -439,25 +453,25 @@ void cumulative(int gensigbkgreco=3, int doMC=0, int index_var=2, bool doIntegra
     empty2->GetXaxis()->SetNdivisions(505);
     empty2->GetYaxis()->SetNdivisions(505);
     empty->GetYaxis()->SetNdivisions(505);
-    empty->GetXaxis()->SetTitleSize(18);
+    empty->GetXaxis()->SetTitleSize(28);
    empty->GetXaxis()->SetTitleFont(43); 
    empty->GetXaxis()->SetTitleOffset(2.2);
-   empty->GetXaxis()->SetLabelSize(12);
+   empty->GetXaxis()->SetLabelSize(22);
    empty->GetXaxis()->SetLabelFont(43);
-   empty->GetYaxis()->SetTitleSize(18);
+   empty->GetYaxis()->SetTitleSize(28);
    empty->GetYaxis()->SetTitleFont(43); 
    empty->GetYaxis()->SetTitleOffset(2.2);
-   empty->GetYaxis()->SetLabelSize(12);
+   empty->GetYaxis()->SetLabelSize(22);
    empty->GetYaxis()->SetLabelFont(43);
-    empty2->GetXaxis()->SetTitleSize(18);
+    empty2->GetXaxis()->SetTitleSize(28);
    empty2->GetXaxis()->SetTitleFont(43); 
    empty2->GetXaxis()->SetTitleOffset(2.2);
-   empty2->GetXaxis()->SetLabelSize(12);
+   empty2->GetXaxis()->SetLabelSize(22);
    empty2->GetXaxis()->SetLabelFont(43);
-   empty2->GetYaxis()->SetTitleSize(18);
+   empty2->GetYaxis()->SetTitleSize(28);
    empty2->GetYaxis()->SetTitleFont(43); 
    empty2->GetYaxis()->SetTitleOffset(1.8);
-   empty2->GetYaxis()->SetLabelSize(12);
+   empty2->GetYaxis()->SetLabelSize(22);
    empty2->GetYaxis()->SetLabelFont(43);
    
    
@@ -500,11 +514,12 @@ void cumulative(int gensigbkgreco=3, int doMC=0, int index_var=2, bool doIntegra
 
   hmpt_vs_alpha_diff[npt-1][icent]->Draw("same");
   zeroLine_p->Draw("same");
-  // if(icent==1)drawText(Form("%d-%d %%",(int)(0.5*cent_min[icent]),(int)(0.5*cent_max[icent])),0.3,0.85);
-  // else drawText(Form("%d-%d %%",(int)(0.5*cent_min[icent]),(int)(0.5*cent_max[icent])),0.22,0.85);
+  if(icent==1)drawText(Form("%d-%d %%",(int)(0.5*cent_min[icent]),(int)(0.5*cent_max[icent])),0.3,0.85);
+  else drawText(Form("%d-%d %%",(int)(0.5*cent_min[icent]),(int)(0.5*cent_max[icent])),0.22,0.85);
    c1->cd((3*(ncent))-icent)->RedrawAxis();
    if(!doMC)drawText("PbPb-pp",0.22,0.9);
-   else drawText("reco-gen jet",0.22,0.9);
+   else drawText("reco jet-gen jet w. gen part.",0.22,0.9);
+   drawText("PYTHIA+HYDJET",0.25,0.7);
  if(icent==0){ 
   if(Ajmin[iAj]==0 && Ajmax[iAj]==1) drawText(Form("|#eta_{1}|,|#eta_{2}|<%.2f",etadijet),0.25,0.25);
   else if(Ajmin[iAj]==0) drawText(Form("|#eta_{1}|,|#eta_{2}|<%.2f, A_{J} < %.2f",etadijet,Ajmax[iAj]),0.25,0.25);
@@ -532,14 +547,14 @@ void cumulative(int gensigbkgreco=3, int doMC=0, int index_var=2, bool doIntegra
   
   if(icent==0)leg2->AddEntry(hmpt_vs_alpha[npt-1][icent],">0.5","p");
   hmpt_vs_alpha[npt-1][icent]->Draw("same");
-  // drawText(Form("%d-%d %%",(int)(0.5*cent_min[icent]),(int)(0.5*cent_max[icent])),0.22,0.85);
-  // drawText(Form("%d-%d %%",(int)(0.5*cent_min[icent]),(int)(0.5*cent_max[icent])),0.22,0.85);
+  drawText(Form("%d-%d %%",(int)(0.5*cent_min[icent]),(int)(0.5*cent_max[icent])),0.22,0.85);
+  drawText(Form("%d-%d %%",(int)(0.5*cent_min[icent]),(int)(0.5*cent_max[icent])),0.22,0.85);
    zeroLine_p->Draw("same");
    c1->cd(2*ncent-icent)->RedrawAxis();
    if(!doMC){
      if(icent==1) drawText("PbPb",0.3,0.9);
      else drawText("PbPb",0.22,0.9);
-   }else drawText("PYTHIA,reco jet",0.22,0.9);
+   }else drawText("PYTHIA+HYDJET,reco",0.22,0.9);
 
  } 
   
@@ -555,22 +570,21 @@ void cumulative(int gensigbkgreco=3, int doMC=0, int index_var=2, bool doIntegra
   
   if(icent==0)leg2->AddEntry(hmpt_vs_alpha_ref[npt-1][icent],">0.5","p");
   hmpt_vs_alpha_ref[npt-1][icent]->Draw("same");
-  // drawText(Form("%d-%d %%",(int)(0.5*cent_min[icent]),(int)(0.5*cent_max[icent])),0.22,0.85);
-  // drawText(Form("%d-%d %%",(int)(0.5*cent_min[icent]),(int)(0.5*cent_max[icent])),0.22,0.85);
+  drawText(Form("%d-%d %%",(int)(0.5*cent_min[icent]),(int)(0.5*cent_max[icent])),0.22,0.85);
+  drawText(Form("%d-%d %%",(int)(0.5*cent_min[icent]),(int)(0.5*cent_max[icent])),0.22,0.85);
    zeroLine_p->Draw("same");
    c1->cd(ncent-icent)->RedrawAxis();
    if(!doMC){
      if(icent==1) drawText("PbPb",0.3,0.9);
      else drawText("PbPb",0.22,0.9);
-   }else drawText("PYTHIA,gen jet",0.22,0.9);
+   }else drawText("PYTHIA+HYDJET,gen",0.22,0.9);
 
  } 
   
- c1->SaveAs(Form("systematics_pp/systematics_jet_eta%d_doMC%d_%s_doIntegrate%d_doGenJet%d_kind%d_Aj%d_%d_ncent%d_trkmax.png",(int)(etadijet*10),doMC,svariable[index_var].Data(),doIntegrate,doGenJet,gensigbkgreco,(int)(Ajmin[iAj]*10),(int)(Ajmax[iAj]*10),ncent));
- c1->SaveAs(Form("systematics_pp/systematics_jet_eta%d_doMC%d_%s_doIntegrate%d_doGenJet%d_kind%d_Aj%d_%d_ncent%d_trkmax.pdf",(int)(etadijet*10),doMC,svariable[index_var].Data(),doIntegrate,doGenJet,gensigbkgreco,(int)(Ajmin[iAj]*10),(int)(Ajmax[iAj]*10),ncent));
+ c1->SaveAs(Form("systematics/systematics_jet_eta%d_doMC%d_%s_doIntegrate%d_doGenJet%d_kind%d_Aj%d_%d_ncent%d_akVs2Calo.png",(int)(etadijet*10),doMC,svariable[index_var].Data(),doIntegrate,doGenJet,gensigbkgreco,(int)(Ajmin[iAj]*10),(int)(Ajmax[iAj]*10),ncent));
+ c1->SaveAs(Form("systematics/systematics_jet_eta%d_doMC%d_%s_doIntegrate%d_doGenJet%d_kind%d_Aj%d_%d_ncent%d_akVs2Calo.pdf",(int)(etadijet*10),doMC,svariable[index_var].Data(),doIntegrate,doGenJet,gensigbkgreco,(int)(Ajmin[iAj]*10),(int)(Ajmax[iAj]*10),ncent));
 
- 
- TFile *outf = new TFile(Form("systematics_pp/outf_Aj%d.root",iAj),"recreate");
+ TFile *outf = new TFile(Form("systematics/outf_Aj%d.root",iAj),"recreate");
  for(int icent=0;icent<ncent;icent++){ 
   hmpt_vs_alpha_diff[npt-1][icent]->Write();
  }

@@ -215,12 +215,12 @@ void cumulative(int gensigbkgreco=3, int doMC=0, int index_var=2, bool doIntegra
  leg->SetFillStyle(0);
  leg->SetTextFont(43);
  leg->SetTextSize(18);
- leg3 = new TLegend(0.35,0.1,0.95,0.4);
+ leg3 = new TLegend(0.35,0.1,0.975,0.4);
  leg3->SetBorderSize(0); 
  leg3->SetFillStyle(0); 
  leg3->SetTextFont(43);
  leg3->SetTextSize(18);
- leg4 = new TLegend(0.35,0.3,0.95,0.25);
+ leg4 = new TLegend(0.35,0.3,0.975,0.25);
  leg4->SetBorderSize(0); 
  leg4->SetFillStyle(0); 
  leg4->SetTextFont(43);
@@ -235,13 +235,13 @@ void cumulative(int gensigbkgreco=3, int doMC=0, int index_var=2, bool doIntegra
  for(int ipt=0;ipt<npt;ipt++){ 
   if(!doMC){  
    // f[ipt] = TFile::Open(Form("/afs/cern.ch/user/d/dgulhan/workDir/missingPt/ntuples_PbPb_mptonly_20140325_v5/full_ntuple_hiForest_Jet80or95_GR_R_53_LV6_03Mar2014_1600CET_CMSSW_5_3_16_merged_pt%d_%d_akVs3Calo.root",(int)ptmin[ipt],(int)ptmax[ipt])); 
-   f[ipt] = TFile::Open(Form("/afs/cern.ch/user/d/dgulhan/workDir/missingPt/ntuples_pp_mptonly_20140325_v4/full_ntuple_PP2013_HiForest_PromptReco_JsonPP_Jet80_PPReco_forestv82_pt%d_%d_ak3Calo.root",(int)ptmin[ipt],(int)ptmax[ipt])); 
-   f_ref[ipt] = TFile::Open(Form("/afs/cern.ch/user/d/dgulhan/workDir/missingPt/ntuples_pp_mptonly_20140325_v4/full_ntuple_PP2013_HiForest_PromptReco_JsonPP_Jet80_PPReco_forestv82_pt%d_%d_ak3Calo.root",(int)ptmin[ipt],(int)ptmax[ipt])); 
+   f[ipt] = TFile::Open(Form("/afs/cern.ch/user/d/dgulhan/workDir/missingPt/ntuples_pp_20140428/full_ntuple_HiForest_pp_Jet80_v8_PP2013_HiForest_PromptReco_JsonPP_Jet80_PPReco_merged_forest_0_pt%d_%d_ak3Calo.root",(int)ptmin[ipt],(int)ptmax[ipt])); 
+   f_ref[ipt] = TFile::Open(Form("/afs/cern.ch/user/d/dgulhan/workDir/missingPt/ntuples_pp_20140428/full_ntuple_HiForest_pp_Jet80_v8_PP2013_HiForest_PromptReco_JsonPP_Jet80_PPReco_merged_forest_0_pt%d_%d_ak3Calo.root",(int)ptmin[ipt],(int)ptmax[ipt])); 
   }
   
   if(doMC){
-   f[ipt] = TFile::Open(Form("/afs/cern.ch/user/d/dgulhan/workDir/missingPt/ntuples_PYTHIA_mptonly_20140325_v5/full_ntuple_pt120_pp2013_P01_prod22_v81_merged_forest_0_pt%d_%d_ak3Calo_doGenJet0.root",(int)ptmin[ipt],(int)ptmax[ipt],doGenJet)); 
-   f_ref[ipt] = TFile::Open(Form("/afs/cern.ch/user/d/dgulhan/workDir/missingPt/ntuples_PYTHIA_mptonly_20140325_v5/full_ntuple_pt120_pp2013_P01_prod22_v81_merged_forest_0_pt%d_%d_ak3Calo_doGenJet1.root",(int)ptmin[ipt],(int)ptmax[ipt],doGenJet)); 
+   f[ipt] = TFile::Open(Form("/afs/cern.ch/user/d/dgulhan/workDir/missingPt/ntuples_PYTHIA_20140429_multdiff/full_ntuple_pt120_pp2013_P01_prod22_v81_merged_forest_0_pt%d_%d_ak3Calo_doGenJet0.root",(int)ptmin[ipt],(int)ptmax[ipt],doGenJet)); 
+   f_ref[ipt] = TFile::Open(Form("/afs/cern.ch/user/d/dgulhan/workDir/missingPt/ntuples_PYTHIA_20140429_multdiff/full_ntuple_pt120_pp2013_P01_prod22_v81_merged_forest_0_pt%d_%d_ak3Calo_doGenJet1.root",(int)ptmin[ipt],(int)ptmax[ipt],doGenJet)); 
   }
  
   cout<<Form("nt_%s%s_%s%s",smpt[domp].Data(),skind[gensigbkgreco].Data(),svariable[index_var].Data(),strave.Data())<<endl; 
@@ -291,13 +291,13 @@ void cumulative(int gensigbkgreco=3, int doMC=0, int index_var=2, bool doIntegra
    }
    }
    h_ref[ipt][ialpha][icent]=new TH1D(Form("h_ref_%d_%d_%d",ialpha,ipt,icent),"",100000,-100000,100000);
-   t_ref[ipt]->Draw(Form("%s>>h_ref_%d_%d_%d",sintegrate[ialpha][ipt].Data(),ialpha,ipt,icent),Form("((pt1*0.95)>%d && (pt2*0.95)>%d && abs(eta1)<%.1f && abs(eta2)<%.1f && dphi>(5*TMath::Pi()/6)&& ((pt1-pt2)/(pt2+pt1))>=%.2f && ((pt1-pt2)/(pt2+pt1))<%.2f && abs(vz)<15)",jetpt1,jetpt2,etadijet,etadijet,Ajmin[iAj],Ajmax[iAj]),"");
+   t_ref[ipt]->Draw(Form("%s>>h_ref_%d_%d_%d",sintegrate[ialpha][ipt].Data(),ialpha,ipt,icent),Form("((pt1*1.025)>%d && (pt2*0.975)>%d && abs(eta1)<%.1f && abs(eta2)<%.1f && dphi>(5*TMath::Pi()/6)&& ((pt1*1.025-pt2*0.975)/(pt2*0.975+pt1*1.025))>=%.2f && ((pt1*1.025-pt2*0.975)/(pt2*0.975+pt1*1.025))<%.2f && abs(vz)<15)",jetpt1,jetpt2,etadijet,etadijet,Ajmin[iAj],Ajmax[iAj]),"");
    
    mpt_ref[ipt][ialpha][icent]=h_ref[ipt][ialpha][icent]->GetMean();
    mpterr_ref[ipt][ialpha][icent]=h_ref[ipt][ialpha][icent]->GetMeanError();
    if(ipt==npt-1){
     h_ref_stat[ipt][ialpha][icent]=new TH1D(Form("h_ref_stat_%d_%d_%d",ialpha,ipt,icent),"",100000,-100000,100000);
-    t_ref[ipt]->Draw(Form("%s>>h_ref_stat_%d_%d_%d",sintegrate_stat[ialpha][ipt].Data(),ialpha,ipt,icent),Form("((pt1*0.95)>%d && (pt2*0.95)>%d && abs(eta1)<%.1f && abs(eta2)<%.1f && dphi>(5*TMath::Pi()/6)&& ((pt1-pt2)/(pt2+pt1))>=%.2f && ((pt1-pt2)/(pt2+pt1))<%.2f && abs(vz)<15)",jetpt1,jetpt2,etadijet,etadijet,Ajmin[iAj],Ajmax[iAj]),"");
+    t_ref[ipt]->Draw(Form("%s>>h_ref_stat_%d_%d_%d",sintegrate_stat[ialpha][ipt].Data(),ialpha,ipt,icent),Form("((pt1*1.025)>%d && (pt2*1.95)>%d && abs(eta1)<%.1f && abs(eta2)<%.1f && dphi>(5*TMath::Pi()/6)&& ((pt1*1.025-pt2*0.975)/(pt2*0.975+pt1*1.025))>=%.2f && ((pt1*1.025-pt2*0.975)/(pt2*0.975+pt1*1.025))<%.2f && abs(vz)<15)",jetpt1,jetpt2,etadijet,etadijet,Ajmin[iAj],Ajmax[iAj]),"");
     mpterr_ref[ipt][ialpha][icent]=h_ref_stat[ipt][ialpha][icent]->GetMeanError();
    }
    
@@ -424,8 +424,8 @@ void cumulative(int gensigbkgreco=3, int doMC=0, int index_var=2, bool doIntegra
  }else{
   empty->SetMaximum(20); 
   empty->SetMinimum(-55); 
-  empty2->SetMaximum(15); 
-  empty2->SetMinimum(-10); 
+  empty2->SetMaximum(4.5); 
+  empty2->SetMinimum(-4.5); 
  
  }
     empty->GetXaxis()->CenterTitle();
@@ -501,7 +501,7 @@ void cumulative(int gensigbkgreco=3, int doMC=0, int index_var=2, bool doIntegra
   // if(icent==1)drawText(Form("%d-%d %%",(int)(0.5*cent_min[icent]),(int)(0.5*cent_max[icent])),0.3,0.85);
   // else drawText(Form("%d-%d %%",(int)(0.5*cent_min[icent]),(int)(0.5*cent_max[icent])),0.22,0.85);
    c1->cd((3*(ncent))-icent)->RedrawAxis();
-   if(!doMC)drawText("(JES - %5) - JES",0.22,0.9);
+   if(!doMC)drawText("(JES(%2.5 asymetric)) - JES",0.22,0.9);
    else drawText("reco-gen",0.22,0.9);
    drawText("pp",0.25,0.35);
 
@@ -560,20 +560,20 @@ void cumulative(int gensigbkgreco=3, int doMC=0, int index_var=2, bool doIntegra
    zeroLine_p->Draw("same");
    c1->cd(ncent-icent)->RedrawAxis();
    if(!doMC){
-     if(icent==1) drawText("pp, JES-%5",0.3,0.9);
-     else drawText("pp",0.22,0.9);
+     if(icent==1) drawText("pp, JES(%2.5 asymetric)",0.3,0.9);
+     else drawText("pp, JES(%2.5 asymetric)",0.22,0.9);
    }else drawText("PYTHIA,gen",0.22,0.9);
 
  } 
   
- c1->SaveAs(Form("systematics_pp/systematics_JESm5_eta%d_doMC%d_%s_doIntegrate%d_doGenJet%d_kind%d_Aj%d_%d_ncent%d.png",(int)(etadijet*10),doMC,svariable[index_var].Data(),doIntegrate,doGenJet,gensigbkgreco,(int)(Ajmin[iAj]*10),(int)(Ajmax[iAj]*10),ncent));
- c1->SaveAs(Form("systematics_pp/systematics_JESm5_eta%d_doMC%d_%s_doIntegrate%d_doGenJet%d_kind%d_Aj%d_%d_ncent%d.pdf",(int)(etadijet*10),doMC,svariable[index_var].Data(),doIntegrate,doGenJet,gensigbkgreco,(int)(Ajmin[iAj]*10),(int)(Ajmax[iAj]*10),ncent));
+ c1->SaveAs(Form("systematics_pp/systematics_JESasym5_eta%d_doMC%d_%s_doIntegrate%d_doGenJet%d_kind%d_Aj%d_%d_ncent%d.png",(int)(etadijet*10),doMC,svariable[index_var].Data(),doIntegrate,doGenJet,gensigbkgreco,(int)(Ajmin[iAj]*10),(int)(Ajmax[iAj]*10),ncent));
+ c1->SaveAs(Form("systematics_pp/systematics_JESasym5_eta%d_doMC%d_%s_doIntegrate%d_doGenJet%d_kind%d_Aj%d_%d_ncent%d.pdf",(int)(etadijet*10),doMC,svariable[index_var].Data(),doIntegrate,doGenJet,gensigbkgreco,(int)(Ajmin[iAj]*10),(int)(Ajmax[iAj]*10),ncent));
 
  
- TFile *outf = new TFile(Form("systematics_pp/outf_Aj%d.root",iAj),"recreate");
- for(int icent=0;icent<ncent;icent++){ 
-  hmpt_vs_alpha_diff[npt-1][icent]->Write();
- }
- outf->Close();
+ // TFile *outf = new TFile(Form("systematics_pp/outf_Aj%d.root",iAj),"recreate");
+ // for(int icent=0;icent<ncent;icent++){ 
+  // hmpt_vs_alpha_diff[npt-1][icent]->Write();
+ // }
+ // outf->Close();
  
 }

@@ -139,8 +139,10 @@ void drawPatch(float x1, float y1, float x2, float y2){
 
 
 void cumulative(int gensigbkgreco=0, int doMC=1, int index_var=3, bool doIntegrate=false,  int iAj=0, int doAve=1){
-bool doPPTracking=0;
-int radius=3;
+int radius=5;
+
+
+
 //systematics arrays
 double pp_iAj0[]={5.2,1,1,1,0.5,0.5,0.5,0.5,0.5,0.5};
 double pp_iAj1[]={10.4,1.5,1.5,1.5,1.,1.0,1.0,1.0,1.0,1.0};
@@ -158,8 +160,8 @@ double PbPb_pp_iAj2[]={2.2,1.1,1.1,1.1,1.1,1.1,0.7,0.7,0.7,0.7};
  bool doCompareGenReco= false;
  int domp=0;
  int ncent=2;  
- bool doGenJet=true;
- double etadijet=0.6;
+ bool doGenJet=false;
+ double etadijet=0.5;
  TString smpt[]={"mpt","mp","mpt_boosted"};
  TString skind[]={"","_s","_b","_tracks","_tracks_uncorr","_parts"};
  TString spart[]={"gen. part.","gen. sig.","gen. part.","corr reco. part.","uncorr. reco.","gen. part."};
@@ -171,12 +173,12 @@ double PbPb_pp_iAj2[]={2.2,1.1,1.1,1.1,1.1,1.1,0.7,0.7,0.7,0.7};
  int docorr=0;
  if(gensigbkgreco==3)docorr=1;
  int jetpt1=120; 
- int jetpt2=40;
+ int jetpt2=50;
  int npt=6;
  // int  cent_min[]={0,20,40,60,100};
  // int cent_max[]={20,40,60,100,200};
- int  cent_min[]={0,60};
- int cent_max[]={60,200};
+ int  cent_min[]={0,60,0};
+ int cent_max[]={60,200,200};
  double ptmin[]={  8,4,2,1,0.5,0.5};
  double ptmax[]={300,8,4,2,  1,300};
  double systematics[] = { 0.5,1};
@@ -202,15 +204,15 @@ double PbPb_pp_iAj2[]={2.2,1.1,1.1,1.1,1.1,1.1,0.7,0.7,0.7,0.7};
  TFile *f_ref[npt];
  TTree *t_ref[npt];
  TTree *t_jet_ref[npt]; 
- double mpt_ref[npt][nalpha+1];
- double mpterr_ref[npt][nalpha+1];
- double mptsum_ref[nalpha+1];
- double mptsumpos_ref[nalpha+1];
- double mptsumneg_ref[nalpha+1];
- TH1D* h_ref[npt][nalpha+1];
- TH1D* h_ref_stat[npt][nalpha+1];
- TH1D *hsum_ref[nalpha+1];
- TH1D * hmpt_vs_alpha_ref[npt];
+ double mpt_ref[npt][nalpha+1][ncent+1];
+ double mpterr_ref[npt][nalpha+1][ncent+1];
+ double mptsum_ref[nalpha+1][ncent+1];
+ double mptsumpos_ref[nalpha+1][ncent+1];
+ double mptsumneg_ref[nalpha+1][ncent+1];
+ TH1D* h_ref[npt][nalpha+1][ncent+1];
+ TH1D* h_ref_stat[npt][nalpha+1][ncent+1];
+ TH1D *hsum_ref[nalpha+1][ncent+1];
+ TH1D * hmpt_vs_alpha_ref[npt][ncent+1];
  
  double mpt_cum;
  double mpterr_cum;  
@@ -218,12 +220,12 @@ double PbPb_pp_iAj2[]={2.2,1.1,1.1,1.1,1.1,1.1,0.7,0.7,0.7,0.7};
  TH1D* h_stat_cum[nalpha+1][ncent];
  TH1D * hmpt_vs_alpha_cum[ncent];
 
- double mpt_ref_cum[nalpha+1];
- double mpterr_ref_cum[nalpha+1];
- TH1D* h_ref_cum[nalpha+1];
- TH1D* h_ref_stat_cum[nalpha+1];
- TH1D *hsum_ref_cum[nalpha+1];
- TH1D * hmpt_vs_alpha_ref_cum;
+ double mpt_ref_cum[nalpha+1][ncent];
+ double mpterr_ref_cum[nalpha+1][ncent];
+ TH1D* h_ref_cum[nalpha+1][ncent];
+ TH1D* h_ref_stat_cum[nalpha+1][ncent];
+ TH1D *hsum_ref_cum[nalpha+1][ncent];
+ TH1D * hmpt_vs_alpha_ref_cum[ncent];
  
  double mpt_diff;
  double mpterr_diff;
@@ -244,10 +246,14 @@ double PbPb_pp_iAj2[]={2.2,1.1,1.1,1.1,1.1,1.1,0.7,0.7,0.7,0.7};
  }
  for(int ialpha=0;ialpha<nalpha+1;ialpha++){
  
-   mptsum_ref[ialpha]=0;
-   mptsumpos_ref[ialpha]=0;
-   mptsumneg_ref[ialpha]=0;
+   mptsum_ref[ialpha][ncent]=0;
+   mptsumpos_ref[ialpha][ncent]=0;
+   mptsumneg_ref[ialpha][ncent]=0;
   for(int icent=0;icent<ncent;icent++){
+    mptsum_ref[ialpha][icent]=0;
+    mptsum_ref[ialpha][icent]=0;
+   mptsumpos_ref[ialpha][icent]=0;
+   mptsumneg_ref[ialpha][icent]=0;
    mptsum[ialpha][icent]=0;
    mptsumpos[ialpha][icent]=0;
    mptsumneg[ialpha][icent]=0;
@@ -274,30 +280,21 @@ double PbPb_pp_iAj2[]={2.2,1.1,1.1,1.1,1.1,1.1,0.7,0.7,0.7,0.7};
  leg4->SetTextFont(43);
  leg4->SetTextSize(22);
  leg2 = new TLegend(0.15,0.14,0.65,0.39); 
- leg2->SetBorderSize(0); 
+ leg2->SetBorderSize(0);  
  leg2->SetFillStyle(0); 
  leg2->SetTextFont(43);
  leg2->SetTextSize(22);
  double frac[]={0.0001,0.2,0.4,0.6,0.8,1.,1.2,1.4,1.6,1.8,2,2.2,2.4,3,4,5};
  
  for(int ipt=0;ipt<npt;ipt++){ 
-  if(!doMC){  
+   
    // if(ipt==npt-1) f[ipt] = TFile::Open(Form("/afs/cern.ch/user/d/dgulhan/workDir/missingPt/ntuples_PbPb_20140428_lastptbinoldcorr//full_ntuple_HIRun2011-14Mar2014-v2-6lumi-jet80-forest-v4-merged_pt%d_%d_akVs3Calo_v2.root",(int)ptmin[ipt],(int)ptmax[ipt])); 
-   if(doPPTracking) f_ref[ipt] = TFile::Open(Form("../../ntuples_pp_20140821/small_ntuple_PPHighPtData_ForestTag_PYTHIA_localdb_ppJEC_merged_forest_0_pt%d_%d_ak%dCalo.root",(int)ptmin[ipt],(int)ptmax[ipt],radius)); 
-   else f_ref[ipt] = TFile::Open(Form("../../ntuples_pp_20140821/small_ntuple_PPJet80skimmed_PPForest_HIReco_localdb_ppJEC_pt%d_%d_ak%dCalo_PPTracking0.root",(int)ptmin[ipt],(int)ptmax[ipt],radius)); 
+   f_ref[ipt] = TFile::Open(Form("/data/dgulhan/missingPt/ntuples_MC_20140804/HiForest_PYTHIA_HYDJET_Track9_Jet30_matchEqR_pt%d_%d_akVs%dCalo_doGenJet0.root",(int)ptmin[ipt],(int)ptmax[ipt],radius)); 
+   // else f_ref[ipt] = TFile::Open(Form("/data/dgulhan/missingPt/2014_07_04/ntuples_MC_20140428/full_ntuple_HydjetDrum_Pyquen_Dijet_FOREST_Track8_Jet24_FixedPtHatJES_v0_pt%d_%d_akVs%dCalo_doGenJet0.root",(int)ptmin[ipt],(int)ptmax[ipt],radius)); 
    if(radius!=3)f[ipt] = TFile::Open(Form("../../ntuples_PbPb_20140820/full_ntuple_PbPbForest_MatchEqR_Calo_HIHighPt_HIRun2011-14Mar2014-v4_pt%d_%d_akVs%dCalo_v2.root",(int)ptmin[ipt],(int)ptmax[ipt],radius)); 
    else f[ipt] = TFile::Open(Form("/data/dgulhan/missingPt/2014_07_04/ntuples_PbPb_20140506_1p15M/full_ntuple_HIRun2011-14Mar2014-v2-6lumi-jet80-forest-v4ANDv9-merged_pt%d_%d_akVs%dCalo_v2.root",(int)ptmin[ipt],(int)ptmax[ipt],radius)); 
-  }
+   
   
-  if(doMC){
-   // f[ipt] = TFile::Open(Form("/afs/cern.ch/user/d/dgulhan/workDir/missingPt/ntuples_MC_20140428//full_ntuple_HydjetDrum_Pyquen_Dijet_FOREST_Track8_Jet24_FixedPtHatJES_v0_pt%d_%d_akVs3Calo_doGenJet0.root",(int)ptmin[ipt],(int)ptmax[ipt],doGenJet)); 
-   // if(!doGenJet) f_ref[ipt] = TFile::Open(Form("/afs/cern.ch/user/d/dgulhan/workDir/missingPt/ntuples_PYTHIA_20140429_multdiff/full_ntuple_HiForest_pt80_PYTHIA_ppReco_JECv85_merged_forest_0_pt%d_%d_ak3Calo_doGenJet1.root",(int)ptmin[ipt],(int)ptmax[ipt],doGenJet)); 
-   // else f_ref[ipt] = TFile::Open(Form("/afs/cern.ch/user/d/dgulhan/workDir/missingPt/ntuples_PYTHIA_20140429_multdiff/full_ntuple_pt80_pp2013_P01_prod22_v81_merged_forest_0_pt%d_%d_ak3Calo_doGenJet1.root",(int)ptmin[ipt],(int)ptmax[ipt],doGenJet)); 
-   f[ipt] = TFile::Open(Form("/data/dgulhan/missingPt/gen/nocut_full_ntuple_PythiaZ2Star_pt%d_%d.root",(int)ptmin[ipt],(int)ptmax[ipt],doGenJet)); 
-   if(!doGenJet) f_ref[ipt] = TFile::Open(Form("/data/dgulhan/missingPt/gen/nocut_full_ntuple_PythiaZ2Star_pt%d_%d",(int)ptmin[ipt],(int)ptmax[ipt],doGenJet)); 
-   else f_ref[ipt] = TFile::Open(Form("/data/dgulhan/missingPt/gen/nocut_full_ntuple_jewel-80-mb_pt%d_%d.root",(int)ptmin[ipt],(int)ptmax[ipt],doGenJet)); 
-  }
- 
   // cout<<Form("nt_%s%s_%s%s",smpt[domp].Data(),skind[gensigbkgreco].Data(),svariable[index_var].Data(),strave.Data())<<endl; 
 
   f[ipt]->cd();
@@ -315,11 +312,11 @@ double PbPb_pp_iAj2[]={2.2,1.1,1.1,1.1,1.1,1.1,0.7,0.7,0.7,0.7};
   t_jet_ref[ipt]=(TTree*)f_ref[ipt]->Get("nt_jet");
   t_ref[ipt]->AddFriend(t_jet_ref[ipt]);
   
-  hmpt_vs_alpha_ref[ipt]= new TH1D(Form("hmpt_ref_%d",ipt),"",nalpha/2+1,frac);
-  if(ipt==npt-1)hmpt_vs_alpha_ref_cum= new TH1D(Form("hmpt_ref_cum_%d",ipt),"",nalpha/2+1,frac);
+  hmpt_vs_alpha_ref[ipt][ncent]= new TH1D(Form("hmpt_ref_%d",ipt),"",nalpha/2+1,frac);
+  if(ipt==npt-1)hmpt_vs_alpha_ref_cum[ncent]= new TH1D(Form("hmpt_ref_cum_%d",ipt),"",nalpha/2+1,frac);
    
   for(int ialpha=0;ialpha<nalpha/2+1;ialpha++){
-   if(ipt==npt-1){
+ if(ipt==npt-1){
     if(ialpha<nalpha/2)s[ipt]=Form("-%s_%d",svariable[index_var].Data(),2*ialpha+1);
     if(ialpha<nalpha/2)sintegrate_stat[ialpha][ipt]=s[ipt];
     else  sintegrate_stat[ialpha][ipt]=Form("-%s%s%s",smpt[domp].Data(),skind[gensigbkgreco].Data(),strave.Data());
@@ -332,43 +329,49 @@ double PbPb_pp_iAj2[]={2.2,1.1,1.1,1.1,1.1,1.1,0.7,0.7,0.7,0.7};
     else if(ialpha==0)sintegrate[ialpha][ipt]=Form("-%s_%d",svariable[index_var].Data(),ialpha+1);
     else  sintegrate[ialpha][ipt]=Form("-%s%s%s+%s_%d",smpt[domp].Data(),skind[gensigbkgreco].Data(),strave.Data(),svariable[index_var].Data(),nalpha-1);
    }
-   h_ref[ipt][ialpha]=new TH1D(Form("h_ref_%d_%d",ialpha,ipt),"",4000,-2000,2000);
-   t_ref[ipt]->Draw(Form("%s>>h_ref_%d_%d",sintegrate[ialpha][ipt].Data(),ialpha,ipt),Form("pt1>%d && pt2>%d && abs(eta1)<%.1f && abs(eta2)<%.1f && dphi>(5*TMath::Pi()/6)&& ((pt1-pt2)/(pt2+pt1))>=%.2f && ((pt1-pt2)/(pt2+pt1))<%.2f && abs(vz)<15",jetpt1,jetpt2,etadijet,etadijet,Ajmin[iAj],Ajmax[iAj]),"");
+   h_ref[ipt][ialpha][ncent]=new TH1D(Form("h_ref_%d_%d",ialpha,ipt),"",4000,-2000,2000);
+   // t_ref[ipt]->Draw(Form("%s>>h_ref_%d_%d",sintegrate[ialpha][ipt].Data(),ialpha,ipt),Form("pt1>%d && pt2>%d && abs(eta1)<%.1f && abs(eta2)<%.1f && dphi>(5*TMath::Pi()/6)&& ((pt1-pt2)/(pt2+pt1))>=%.2f && ((pt1-pt2)/(pt2+pt1))<%.2f && abs(vz)<15",jetpt1,jetpt2,etadijet,etadijet,Ajmin[iAj],Ajmax[iAj]),"");
+   t_ref[ipt]->Draw(Form("%s>>h_ref_%d_%d",sintegrate[ialpha][ipt].Data(),ialpha,ipt),Form("weight*cent_weight*(pthat>80)*(pt1>%d && pt2>%d && abs(eta1)<%.1f && abs(eta2)<%.1f && dphi>(5*TMath::Pi()/6) && cent>=%d && cent<%d && ((pt1-pt2)/(pt2+pt1))>=%.2f && ((pt1-pt2)/(pt2+pt1))<%.2f && abs(vz)<15)",jetpt1,jetpt2,etadijet,etadijet, cent_min[ncent],cent_max[ncent],Ajmin[iAj],Ajmax[iAj]),""); 
+   // t_ref[ipt]->Draw(Form("%s>>h_ref_%d_%d",sintegrate[ialpha][ipt].Data(),ialpha,ipt),Form("weight*cent_weight*(pthat>80)*(pt1>%d && pt2>%d && abs(eta1)<%.1f && abs(eta2)<%.1f && dphi>(5*TMath::Pi()/6) && cent>=%d && cent<%d && ((pt1-pt2)/(pt2+pt1))>=%.2f && ((pt1-pt2)/(pt2+pt1))<%.2f && abs(vz)<15)",jetpt1,jetpt2,etadijet,etadijet,0,200,Ajmin[iAj],Ajmax[iAj]),""); 
    
-   mpt_ref[ipt][ialpha]=h_ref[ipt][ialpha]->GetMean();
-   mpterr_ref[ipt][ialpha]=h_ref[ipt][ialpha]->GetMeanError();
+   mpt_ref[ipt][ialpha][ncent]=h_ref[ipt][ialpha][ncent]->GetMean();
+   mpterr_ref[ipt][ialpha][ncent]=h_ref[ipt][ialpha][ncent]->GetMeanError();
    if(ipt==npt-1){
-    h_ref_stat[ipt][ialpha]=new TH1D(Form("h_ref_stat_%d_%d",ialpha,ipt),"",4000,-2000,2000);
-    t_ref[ipt]->Draw(Form("%s>>h_ref_stat_%d_%d",sintegrate_stat[ialpha][ipt].Data(),ialpha,ipt),Form("pt1>%d && pt2>%d && abs(eta1)<%.1f && abs(eta2)<%.1f && dphi>(5*TMath::Pi()/6)&& ((pt1-pt2)/(pt2+pt1))>=%.2f && ((pt1-pt2)/(pt2+pt1))<%.2f && abs(vz)<15",jetpt1,jetpt2,etadijet,etadijet,Ajmin[iAj],Ajmax[iAj]),"");
-    mpt_ref_cum[ialpha]=h_ref_stat[ipt][ialpha]->GetMean();
-    mpterr_ref_cum[ialpha]=h_ref[ipt][ialpha]->GetMeanError();
+    h_ref_stat[ipt][ialpha][ncent]=new TH1D(Form("h_ref_stat_%d_%d",ialpha,ipt),"",4000,-2000,2000);
+    // t_ref[ipt]->Draw(Form("%s>>h_ref_stat_%d_%d",sintegrate_stat[ialpha][ipt].Data(),ialpha,ipt),Form("pt1>%d && pt2>%d && abs(eta1)<%.1f && abs(eta2)<%.1f && dphi>(5*TMath::Pi()/6)&& ((pt1-pt2)/(pt2+pt1))>=%.2f && ((pt1-pt2)/(pt2+pt1))<%.2f && abs(vz)<15",jetpt1,jetpt2,etadijet,etadijet,Ajmin[iAj],Ajmax[iAj]),"");
+    t_ref[ipt]->Draw(Form("%s>>h_ref_stat_%d_%d",sintegrate_stat[ialpha][ipt].Data(),ialpha,ipt),Form("weight*cent_weight*(pthat>80)*(pt1>%d && pt2>%d && abs(eta1)<%.1f && abs(eta2)<%.1f && dphi>(5*TMath::Pi()/6) && cent>=%d && cent<%d && ((pt1-pt2)/(pt2+pt1))>=%.2f && ((pt1-pt2)/(pt2+pt1))<%.2f && abs(vz)<15)",jetpt1,jetpt2,etadijet,etadijet, cent_min[ncent],cent_max[ncent],Ajmin[iAj],Ajmax[iAj]),""); 
+    // t_ref[ipt]->Draw(Form("%s>>h_ref_stat_%d_%d",sintegrate_stat[ialpha][ipt].Data(),ialpha,ipt),Form("weight*cent_weight*(pthat>80)*(pt1>%d && pt2>%d && abs(eta1)<%.1f && abs(eta2)<%.1f && dphi>(5*TMath::Pi()/6) && cent>=%d && cent<%d && ((pt1-pt2)/(pt2+pt1))>=%.2f && ((pt1-pt2)/(pt2+pt1))<%.2f && abs(vz)<15)",jetpt1,jetpt2,etadijet,etadijet,0,200,Ajmin[iAj],Ajmax[iAj]),""); 
+
+    mpt_ref_cum[ialpha][ncent]=h_ref_stat[ipt][ialpha][ncent]->GetMean();
+    mpterr_ref_cum[ialpha][ncent]=h_ref[ipt][ialpha][ncent]->GetMeanError();
    }
    
    if(ipt<npt-1){
-    mptsum_ref[ialpha]+=mpt_ref[ipt][ialpha];
-    if(mpt_ref[ipt][ialpha]>=0){
-     mptsumpos_ref[ialpha]+=mpt_ref[ipt][ialpha];
-     hmpt_vs_alpha_ref[ipt]->SetBinContent(ialpha+1,mptsumpos_ref[ialpha]);
-     hmpt_vs_alpha_ref[ipt]->SetBinError(ialpha+1,mpterr_ref[ipt][ialpha]);
+    mptsum_ref[ialpha][ncent]+=mpt_ref[ipt][ialpha][ncent];
+    if(mpt_ref[ipt][ialpha][ncent]>=0){
+     mptsumpos_ref[ialpha][ncent]+=mpt_ref[ipt][ialpha][ncent];
+     hmpt_vs_alpha_ref[ipt][ncent]->SetBinContent(ialpha+1,mptsumpos_ref[ialpha][ncent]);
+     hmpt_vs_alpha_ref[ipt][ncent]->SetBinError(ialpha+1,mpterr_ref[ipt][ialpha][ncent]);
     }
-    if(mpt_ref[ipt][ialpha]<0){  
-     mptsumneg_ref[ialpha]+=mpt_ref[ipt][ialpha];
-     hmpt_vs_alpha_ref[ipt]->SetBinContent(ialpha+1,mptsumneg_ref[ialpha]);
-     hmpt_vs_alpha_ref[ipt]->SetBinError(ialpha+1,mpterr_ref[ipt][ialpha]);
+    if(mpt_ref[ipt][ialpha][ncent]<0){  
+     mptsumneg_ref[ialpha][ncent]+=mpt_ref[ipt][ialpha][ncent];
+     hmpt_vs_alpha_ref[ipt][ncent]->SetBinContent(ialpha+1,mptsumneg_ref[ialpha][ncent]);
+     hmpt_vs_alpha_ref[ipt][ncent]->SetBinError(ialpha+1,mpterr_ref[ipt][ialpha][ncent]);
     }
-    hmpt_vs_alpha_ref[ipt]->SetLineColor(1);
-    hmpt_vs_alpha_ref[ipt]->SetMarkerColor(1);
-    hmpt_vs_alpha_ref[ipt]->SetMarkerSize(0);
-    hmpt_vs_alpha_ref[ipt]->SetFillColor(col[ipt]);
+    hmpt_vs_alpha_ref[ipt][ncent]->SetLineColor(1);
+    hmpt_vs_alpha_ref[ipt][ncent]->SetMarkerColor(1);
+    hmpt_vs_alpha_ref[ipt][ncent]->SetMarkerSize(0);
+    hmpt_vs_alpha_ref[ipt][ncent]->SetFillColor(col[ipt]);
 	
    }else{ 
-     hmpt_vs_alpha_ref[ipt]->SetBinContent(ialpha+1,mpt_ref[ipt][ialpha]);
-     hmpt_vs_alpha_ref[ipt]->SetBinError(ialpha+1,mpterr_ref[ipt][ialpha]);
-     hmpt_vs_alpha_ref[ipt]->SetMarkerStyle(25);
-     hmpt_vs_alpha_ref_cum->SetBinContent(ialpha+1, mpt_ref_cum[ialpha]);
-     hmpt_vs_alpha_ref_cum->SetBinError(ialpha+1, mpterr_ref_cum[ialpha]);
+     hmpt_vs_alpha_ref[ipt][ncent]->SetBinContent(ialpha+1,mpt_ref[ipt][ialpha][ncent]);
+     hmpt_vs_alpha_ref[ipt][ncent]->SetBinError(ialpha+1,mpterr_ref[ipt][ialpha][ncent]);
+     hmpt_vs_alpha_ref[ipt][ncent]->SetMarkerStyle(25);
+     hmpt_vs_alpha_ref_cum[ncent]->SetBinContent(ialpha+1, mpt_ref_cum[ialpha][ncent]);
+     hmpt_vs_alpha_ref_cum[ncent]->SetBinError(ialpha+1, mpterr_ref_cum[ialpha][ncent]);
    }
   }
+  
   
   for(int icent=0;icent<ncent;icent++){
   hmpt_vs_alpha[ipt][icent]= new TH1D(Form("hmpt_%d_%d",ipt,icent),"",nalpha/2+1,frac);
@@ -376,11 +379,69 @@ double PbPb_pp_iAj2[]={2.2,1.1,1.1,1.1,1.1,1.1,0.7,0.7,0.7,0.7};
   if(ipt==npt-1){
    hmpt_vs_alpha_cum[icent]= new TH1D(Form("hmpt_ref_%d_%d",ipt,icent),"",nalpha/2+1,frac);
   } 
+   hmpt_vs_alpha_ref[ipt][icent]= new TH1D(Form("hmpt_ref_%d_%d",ipt,icent),"",nalpha/2+1,frac);
+  if(ipt==npt-1)hmpt_vs_alpha_ref_cum[icent]= new TH1D(Form("hmpt_ref_cum_%d",ipt,icent),"",nalpha/2+1,frac);
+   
   for(int ialpha=0;ialpha<nalpha/2+1;ialpha++ ){
+  //***
+     if(ipt==npt-1){
+    if(ialpha<nalpha/2)s[ipt]=Form("-%s_%d",svariable[index_var].Data(),2*ialpha+1);
+    if(ialpha<nalpha/2)sintegrate_stat[ialpha][ipt]=s[ipt];
+    else  sintegrate_stat[ialpha][ipt]=Form("-%s%s%s",smpt[domp].Data(),skind[gensigbkgreco].Data(),strave.Data());
+	
+    if(ialpha<nalpha/2 && ialpha>0) sintegrate[ialpha][ipt]=Form("-%s_%d+%s_%d",svariable[index_var].Data(),2*ialpha+1,svariable[index_var].Data(),2*(ialpha-1)+1);
+    else if(ialpha==0)sintegrate[ialpha][ipt]=Form("-%s_%d",svariable[index_var].Data(),ialpha+1);
+    else  sintegrate[ialpha][ipt]=Form("-%s%s%s+%s_%d",smpt[domp].Data(),skind[gensigbkgreco].Data(),strave.Data(),svariable[index_var].Data(),nalpha-1);
+   }else{
+    if(ialpha<nalpha/2 && ialpha>0) sintegrate[ialpha][ipt]=Form("-%s_%d+%s_%d",svariable[index_var].Data(),2*ialpha+1,svariable[index_var].Data(),2*(ialpha-1)+1);
+    else if(ialpha==0)sintegrate[ialpha][ipt]=Form("-%s_%d",svariable[index_var].Data(),ialpha+1);
+    else  sintegrate[ialpha][ipt]=Form("-%s%s%s+%s_%d",smpt[domp].Data(),skind[gensigbkgreco].Data(),strave.Data(),svariable[index_var].Data(),nalpha-1);
+   }
+   h_ref[ipt][ialpha][icent]=new TH1D(Form("h_ref_%d_%d_%d",ialpha,ipt,icent),"",4000,-2000,2000);
+   // t_ref[ipt]->Draw(Form("%s>>h_ref_%d_%d",sintegrate[ialpha][ipt].Data(),ialpha,ipt),Form("pt1>%d && pt2>%d && abs(eta1)<%.1f && abs(eta2)<%.1f && dphi>(5*TMath::Pi()/6)&& ((pt1-pt2)/(pt2+pt1))>=%.2f && ((pt1-pt2)/(pt2+pt1))<%.2f && abs(vz)<15",jetpt1,jetpt2,etadijet,etadijet,Ajmin[iAj],Ajmax[iAj]),"");
+   t_ref[ipt]->Draw(Form("%s>>h_ref_%d_%d_%d",sintegrate[ialpha][ipt].Data(),ialpha,ipt,icent),Form("weight*cent_weight*(pthat>80)*(pt1>%d && pt2>%d && abs(eta1)<%.1f && abs(eta2)<%.1f && dphi>(5*TMath::Pi()/6) && cent>=%d && cent<%d && ((pt1-pt2)/(pt2+pt1))>=%.2f && ((pt1-pt2)/(pt2+pt1))<%.2f && abs(vz)<15)",jetpt1,jetpt2,etadijet,etadijet, cent_min[icent],cent_max[icent],Ajmin[iAj],Ajmax[iAj]),""); 
+   // t_ref[ipt]->Draw(Form("%s>>h_ref_%d_%d_%d",sintegrate[ialpha][ipt].Data(),ialpha,ipt,icent),Form("weight*cent_weight*(pthat>80)*(pt1>%d && pt2>%d && abs(eta1)<%.1f && abs(eta2)<%.1f && dphi>(5*TMath::Pi()/6) && cent>=%d && cent<%d && ((pt1-pt2)/(pt2+pt1))>=%.2f && ((pt1-pt2)/(pt2+pt1))<%.2f && abs(vz)<15)",jetpt1,jetpt2,etadijet,etadijet,0,200,Ajmin[iAj],Ajmax[iAj]),""); 
+        
+   mpt_ref[ipt][ialpha][icent]=h_ref[ipt][ialpha][icent]->GetMean();
+   mpterr_ref[ipt][ialpha][icent]=h_ref[ipt][ialpha][icent]->GetMeanError();
+   if(ipt==npt-1){
+    h_ref_stat[ipt][ialpha][icent]=new TH1D(Form("h_ref_stat_%d_%d_%d",ialpha,ipt,icent),"",4000,-2000,2000);
+    // t_ref[ipt][icent]->Draw(Form("%s>>h_ref_stat_%d_%d_%d",sintegrate_stat[ialpha][ipt].Data(),ialpha,ipt,icent),Form("pt1>%d && pt2>%d && abs(eta1)<%.1f && abs(eta2)<%.1f && dphi>(5*TMath::Pi()/6)&& ((pt1-pt2)/(pt2+pt1))>=%.2f && ((pt1-pt2)/(pt2+pt1))<%.2f && abs(vz)<15",jetpt1,jetpt2,etadijet,etadijet,Ajmin[iAj],Ajmax[iAj]),"");
+     t_ref[ipt]->Draw(Form("%s>>h_ref_stat_%d_%d_%d",sintegrate_stat[ialpha][ipt].Data(),ialpha,ipt,icent),Form("weight*cent_weight*(pthat>80)*(pt1>%d && pt2>%d && abs(eta1)<%.1f && abs(eta2)<%.1f && dphi>(5*TMath::Pi()/6) && cent>=%d && cent<%d && ((pt1-pt2)/(pt2+pt1))>=%.2f && ((pt1-pt2)/(pt2+pt1))<%.2f && abs(vz)<15)",jetpt1,jetpt2,etadijet,etadijet, cent_min[icent],cent_max[icent],Ajmin[iAj],Ajmax[iAj]),""); 
+     // t_ref[ipt]->Draw(Form("%s>>h_ref_stat_%d_%d_%d",sintegrate_stat[ialpha][ipt].Data(),ialpha,ipt,icent),Form("weight*cent_weight*(pthat>80)*(pt1>%d && pt2>%d && abs(eta1)<%.1f && abs(eta2)<%.1f && dphi>(5*TMath::Pi()/6) && cent>=%d && cent<%d && ((pt1-pt2)/(pt2+pt1))>=%.2f && ((pt1-pt2)/(pt2+pt1))<%.2f && abs(vz)<15)",jetpt1,jetpt2,etadijet,etadijet, 0,200,Ajmin[iAj],Ajmax[iAj]),""); 
+    mpt_ref_cum[ialpha][icent]=h_ref_stat[ipt][ialpha][icent]->GetMean();
+    mpterr_ref_cum[ialpha][icent]=h_ref[ipt][ialpha][icent]->GetMeanError();
+   } 
+   
+   if(ipt<npt-1){
+    mptsum_ref[ialpha][icent]+=mpt_ref[ipt][ialpha][icent];
+    if(mpt_ref[ipt][ialpha][icent]>=0){
+     mptsumpos_ref[ialpha][icent]+=mpt_ref[ipt][ialpha][icent];
+     hmpt_vs_alpha_ref[ipt][icent]->SetBinContent(ialpha+1,mptsumpos_ref[ialpha][icent]);
+     hmpt_vs_alpha_ref[ipt][icent]->SetBinError(ialpha+1,mpterr_ref[ipt][ialpha][icent]);
+    }
+    if(mpt_ref[ipt][ialpha][icent]<0){  
+     mptsumneg_ref[ialpha][icent]+=mpt_ref[ipt][ialpha][icent];
+     hmpt_vs_alpha_ref[ipt][icent]->SetBinContent(ialpha+1,mptsumneg_ref[ialpha][icent]);
+     hmpt_vs_alpha_ref[ipt][icent]->SetBinError(ialpha+1,mpterr_ref[ipt][ialpha][icent]);
+    }
+    hmpt_vs_alpha_ref[ipt][icent]->SetLineColor(1);
+    hmpt_vs_alpha_ref[ipt][icent]->SetMarkerColor(1);
+    hmpt_vs_alpha_ref[ipt][icent]->SetMarkerSize(0);
+    hmpt_vs_alpha_ref[ipt][icent]->SetFillColor(col[ipt]);
+	
+   }else{ 
+     hmpt_vs_alpha_ref[ipt][icent]->SetBinContent(ialpha+1,mpt_ref[ipt][ialpha][icent]);
+     hmpt_vs_alpha_ref[ipt][icent]->SetBinError(ialpha+1,mpterr_ref[ipt][ialpha][icent]);
+     hmpt_vs_alpha_ref[ipt][icent]->SetMarkerStyle(25);
+     hmpt_vs_alpha_ref_cum[icent]->SetBinContent(ialpha+1, mpt_ref_cum[ialpha][icent]);
+     hmpt_vs_alpha_ref_cum[icent]->SetBinError(ialpha+1, mpterr_ref_cum[ialpha][icent]);
+   }
+  //***
    h[ipt][ialpha][icent]=new TH1D(Form("h_%d_%d_%d",ialpha,ipt,icent),"",4000,-2000,2000);
    h_stat[ipt][ialpha][icent]=new TH1D(Form("h_stat_%d_%d_%d",ialpha,ipt,icent),"",4000,-2000,2000);
-   if(!doMC)t[ipt]->Draw(Form("%s>>h_%d_%d_%d",sintegrate[ialpha][ipt].Data(),ialpha,ipt,icent),Form("pt1>%d && pt2>%d && abs(eta1)<%.1f && abs(eta2)<%.1f && dphi>(5*TMath::Pi()/6) && cent>=%d && cent<%d && ((pt1-pt2)/(pt2+pt1))>=%.2f && ((pt1-pt2)/(pt2+pt1))<%.2f && abs(vz)<15",jetpt1,jetpt2,etadijet,etadijet, cent_min[icent],cent_max[icent],Ajmin[iAj],Ajmax[iAj]),"");
-   else t[ipt]->Draw(Form("%s>>h_%d_%d_%d",sintegrate[ialpha][ipt].Data(),ialpha,ipt,icent),Form("weight*cent_weight*(pt1>%d && pt2>%d && abs(eta1)<%.1f && abs(eta2)<%.1f && dphi>(5*TMath::Pi()/6) && cent>=%d && cent<%d && ((pt1-pt2)/(pt2+pt1))>=%.2f && ((pt1-pt2)/(pt2+pt1))<%.2f && abs(vz)<15)",jetpt1,jetpt2,etadijet,etadijet, cent_min[icent],cent_max[icent],Ajmin[iAj],Ajmax[iAj]),"");
+   t[ipt]->Draw(Form("%s>>h_%d_%d_%d",sintegrate[ialpha][ipt].Data(),ialpha,ipt,icent),Form("pt1>%d && pt2>%d && abs(eta1)<%.1f && abs(eta2)<%.1f && dphi>(5*TMath::Pi()/6) && cent>=%d && cent<%d && ((pt1-pt2)/(pt2+pt1))>=%.2f && ((pt1-pt2)/(pt2+pt1))<%.2f && abs(vz)<15",jetpt1,jetpt2,etadijet,etadijet, cent_min[icent],cent_max[icent],Ajmin[iAj],Ajmax[iAj]),"");
+
     mpt=h[ipt][ialpha][icent]->GetMean(); 
     mpterr=h[ipt][ialpha][icent]->GetMeanError();
    
@@ -388,14 +449,14 @@ double PbPb_pp_iAj2[]={2.2,1.1,1.1,1.1,1.1,1.1,0.7,0.7,0.7,0.7};
    mpterr=h[ipt][ialpha][icent]->GetMeanError();
    
    if(ipt==npt-1){
-    if(!doMC)t[ipt]->Draw(Form("%s>>h_stat_%d_%d_%d",sintegrate_stat[ialpha][ipt].Data(),ialpha,ipt,icent),Form("pt1>%d && pt2>%d && abs(eta1)<%.1f && abs(eta2)<%.1f && dphi>(5*TMath::Pi()/6) && cent>=%d && cent<%d && ((pt1-pt2)/(pt2+pt1))>=%.2f && ((pt1-pt2)/(pt2+pt1))<%.2f && abs(vz)<15",jetpt1,jetpt2,etadijet,etadijet, cent_min[icent],cent_max[icent],Ajmin[iAj],Ajmax[iAj]),"");
-    else t[ipt]->Draw(Form("%s>>h_stat_%d_%d_%d",sintegrate_stat[ialpha][ipt].Data(),ialpha,ipt,icent),Form("weight*cent_weight*(pt1>%d && pt2>%d && abs(eta1)<%.1f && abs(eta2)<%.1f && dphi>(5*TMath::Pi()/6) && cent>=%d && cent<%d && ((pt1-pt2)/(pt2+pt1))>=%.2f && ((pt1-pt2)/(pt2+pt1))<%.2f && abs(vz)<15)",jetpt1,jetpt2,etadijet,etadijet, cent_min[icent],cent_max[icent],Ajmin[iAj],Ajmax[iAj]),""); 
+    t[ipt]->Draw(Form("%s>>h_stat_%d_%d_%d",sintegrate_stat[ialpha][ipt].Data(),ialpha,ipt,icent),Form("pt1>%d && pt2>%d && abs(eta1)<%.1f && abs(eta2)<%.1f && dphi>(5*TMath::Pi()/6) && cent>=%d && cent<%d && ((pt1-pt2)/(pt2+pt1))>=%.2f && ((pt1-pt2)/(pt2+pt1))<%.2f && abs(vz)<15",jetpt1,jetpt2,etadijet,etadijet, cent_min[icent],cent_max[icent],Ajmin[iAj],Ajmax[iAj]),"");
+
     mpterr=h[ipt][ialpha][icent]->GetMeanError();
     mpterr_cum=h[ipt][ialpha][icent]->GetMeanError();
     mpt_cum=h_stat[ipt][ialpha][icent]->GetMean();
    }
-   mpt_diff=mpt-mpt_ref[ipt][ialpha];
-   mpterr_diff=sqrt(pow(mpterr,2)+pow(mpterr_ref[ipt][ialpha],2));
+   mpt_diff=mpt-mpt_ref[ipt][ialpha][icent];
+   mpterr_diff=sqrt(pow(mpterr,2)+pow(mpterr_ref[ipt][ialpha][icent],2));
    
    if(ipt<npt-1){
     mptsum[ialpha][icent]+=mpt;
@@ -542,7 +603,7 @@ double PbPb_pp_iAj2[]={2.2,1.1,1.1,1.1,1.1,1.1,0.7,0.7,0.7,0.7};
  else drawText(Form("%.2f < A_{J} < %.0f, |#eta_{trk}|<2.4",Ajmin[iAj],Ajmax[iAj]),0.15,0.54);
  drawText(Form("p_{T,1}>%d, p_{T,2}>%d GeV/c",jetpt1,jetpt2),0.15,0.9);
  drawText(Form("|#eta_{1}|,|#eta_{2}|<%.2f, #Delta#phi_{1,2}>5#pi/6",etadijet),0.15,0.78);
- drawText(Form("anti-k_{T} Calo R=0.%d",radius),0.15,0.66);
+ drawText(Form("anti-k_{T} Calo R=0.5"),0.15,0.66);
  drawText(Form("p_{T}^{trk} (GeV/c):"),0.15,0.42);
  if(!doMC){
    // drawText(Form("PbPb #sqrt{s_{NN}}=2.76 TeV 150/#mub"),0.05,0.66);
@@ -604,38 +665,38 @@ double PbPb_pp_iAj2[]={2.2,1.1,1.1,1.1,1.1,1.1,0.7,0.7,0.7,0.7};
   // else drawText(Form("%d-%d %%",(int)(0.5*cent_min[icent]),(int)(0.5*cent_max[icent])),0.15,0.80);
    c1->cd((2*(ncent+1))-icent)->RedrawAxis();
    if(!doMC){
-    if(icent==1)  drawText("PbPb-pp",0.25,0.9);
-    else  drawText("PbPb-pp",0.15,0.9);
+    if(icent==1)  drawText("PbPb-(PYT.+HYD.)",0.25,0.9);
+    else  drawText("PbPb-(PYT.+HYD.)",0.15,0.9);
    }else drawText("(PYT.+HYD.)-PYT.",0.22,0.9);
    if(icent!=ncent-1)drawPatch(0.0,0.0,0.05,0.19);
    if(icent!=0)drawPatch(0.95,0.0,1,0.19);
    if(icent!=0)drawPatch(0.0,0.95,0.16,1);
  }
- leg4->AddEntry(hmpt_vs_alpha_ref_cum,"pp cumulative","l");
+ leg4->AddEntry(hmpt_vs_alpha_ref_cum[ncent],"pp cumulative","l");
  leg4->AddEntry(hmpt_vs_alpha_cum[0],"PbPb cumulative","l");
  c1->cd(1);
  empty->Draw();
- leg3->AddEntry(hmpt_vs_alpha_ref[npt-1],"pp","p");
+ leg3->AddEntry(hmpt_vs_alpha_ref[npt-1][ncent],"pp","p");
  leg3->AddEntry(hmpt_vs_alpha[npt-1][0],"PbPb","p");
  leg3->AddEntry(hmpt_vs_alpha_diff[npt-1][0],"PbPb-pp","p");
 
  leg3->Draw("same");
  for(int ipt=npt-2;ipt>=0;ipt--){
-  hmpt_vs_alpha_ref[ipt]->Draw("same");
-  hmpt_vs_alpha_ref[ipt]->Draw("same hist");
+  hmpt_vs_alpha_ref[ipt][ncent]->Draw("same");
+  hmpt_vs_alpha_ref[ipt][ncent]->Draw("same hist");
  }
- hmpt_vs_alpha_ref[npt-1]->Draw("same");
- hmpt_vs_alpha_ref_cum->SetMarkerSize(0);
- hmpt_vs_alpha_ref_cum->SetLineStyle(2);
- hmpt_vs_alpha_ref_cum->Draw("same C HIST");
+ hmpt_vs_alpha_ref[npt-1][ncent]->Draw("same");
+ hmpt_vs_alpha_ref_cum[ncent]->SetMarkerSize(0);
+ hmpt_vs_alpha_ref_cum[ncent]->SetLineStyle(2);
+ hmpt_vs_alpha_ref_cum[ncent]->Draw("same C HIST");
  if(index_var==3){
-  for(int ialpha = 0 ;ialpha<hmpt_vs_alpha_ref[npt-1]->GetNbinsX();ialpha++){
-   double  y = hmpt_vs_alpha_ref[npt-1]->GetBinContent(ialpha+1);
+  for(int ialpha = 0 ;ialpha<hmpt_vs_alpha_ref[npt-1][ncent]->GetNbinsX();ialpha++){
+   double  y = hmpt_vs_alpha_ref[npt-1][ncent]->GetBinContent(ialpha+1);
    double yerr;
    if(iAj==0) yerr = pp_iAj0[ialpha];
    if(iAj==1) yerr = pp_iAj1[ialpha];
    if(iAj==2) yerr = pp_iAj2[ialpha];
-   double x=hmpt_vs_alpha_ref[npt-1]->GetBinCenter(ialpha+1);
+   double x=hmpt_vs_alpha_ref[npt-1][ncent]->GetBinCenter(ialpha+1);
    
     TLine * l1= new TLine(x-0.035,y-yerr,x+0.035,y-yerr);
     TLine * l2= new TLine(x-0.035,y-yerr,x+0.035,y-yerr);
@@ -660,7 +721,7 @@ double PbPb_pp_iAj2[]={2.2,1.1,1.1,1.1,1.1,1.1,0.7,0.7,0.7,0.7};
  zeroLine_p->Draw("same");
  c1->cd(1)->RedrawAxis();
  if(!doMC){
-  drawText("pp    5.3 pb^{-1}",0.5,0.9);
+  drawText("(PYT.+HYD.)",0.5,0.9);
   drawText("CMS Preliminary",0.5,0.82);
  }else drawText("PYTHIA",0.3,0.9);
 
@@ -678,9 +739,9 @@ double PbPb_pp_iAj2[]={2.2,1.1,1.1,1.1,1.1,1.1,0.7,0.7,0.7,0.7};
   hmpt_vs_alpha[npt-1][icent]->Draw("same");
   hmpt_vs_alpha_cum[icent]->SetMarkerSize(0);
   hmpt_vs_alpha_cum[icent]->Draw("same C HIST");
-  hmpt_vs_alpha_ref_cum->SetLineStyle(2);
-  hmpt_vs_alpha_ref_cum->SetMarkerSize(0);
-  hmpt_vs_alpha_ref_cum->Draw("same C HIST");
+  hmpt_vs_alpha_ref_cum[ncent]->SetLineStyle(2);
+  hmpt_vs_alpha_ref_cum[ncent]->SetMarkerSize(0);
+  hmpt_vs_alpha_ref_cum[ncent]->Draw("same C HIST");
   if(index_var==3){
    for(int ialpha = 0 ;ialpha<hmpt_vs_alpha[npt-1][icent]->GetNbinsX();ialpha++){
     double  y = hmpt_vs_alpha[npt-1][icent]->GetBinContent(ialpha+1);
@@ -725,10 +786,10 @@ double PbPb_pp_iAj2[]={2.2,1.1,1.1,1.1,1.1,1.1,0.7,0.7,0.7,0.7};
 
  } 
   
- c1->SaveAs(Form("cumulative_eta%d_doMC%d_%s_doIntegrate%d_doGenJet%d_kind%d_Aj%d_%d_ncent%d_r%d_pptrk%d.png",(int)(etadijet*10),doMC,svariable[index_var].Data(),doIntegrate,doGenJet,gensigbkgreco,(int)(Ajmin[iAj]*10),(int)(Ajmax[iAj]*10),ncent,radius,doPPTracking));
- c1->SaveAs(Form("cumulative_eta%d_doMC%d_%s_doIntegrate%d_doGenJet%d_kind%d_Aj%d_%d_ncent%d_r%d_pptrk%d.pdf",(int)(etadijet*10),doMC,svariable[index_var].Data(),doIntegrate,doGenJet,gensigbkgreco,(int)(Ajmin[iAj]*10),(int)(Ajmax[iAj]*10),ncent,radius,doPPTracking));
- c1->SaveAs(Form("cumulative_eta%d_doMC%d_%s_doIntegrate%d_doGenJet%d_kind%d_Aj%d_%d_ncent%d_r%d_pptrk%d.C",(int)(etadijet*10),doMC,svariable[index_var].Data(),doIntegrate,doGenJet,gensigbkgreco,(int)(Ajmin[iAj]*10),(int)(Ajmax[iAj]*10),ncent,radius,doPPTracking));
- c1->SaveAs(Form("cumulative_eta%d_doMC%d_%s_doIntegrate%d_doGenJet%d_kind%d_Aj%d_%d_ncent%d_r%d_pptrk%d.gif",(int)(etadijet*10),doMC,svariable[index_var].Data(),doIntegrate,doGenJet,gensigbkgreco,(int)(Ajmin[iAj]*10),(int)(Ajmax[iAj]*10),ncent,radius,doPPTracking));
+ c1->SaveAs(Form("cumulative_eta%d_doMC%d_%s_doIntegrate%d_doGenJet%d_kind%d_Aj%d_%d_ncent%d_r%d_dataMC.png",(int)(etadijet*10),doMC,svariable[index_var].Data(),doIntegrate,doGenJet,gensigbkgreco,(int)(Ajmin[iAj]*10),(int)(Ajmax[iAj]*10),ncent,radius));
+ c1->SaveAs(Form("cumulative_eta%d_doMC%d_%s_doIntegrate%d_doGenJet%d_kind%d_Aj%d_%d_ncent%d_r%d_dataMC.pdf",(int)(etadijet*10),doMC,svariable[index_var].Data(),doIntegrate,doGenJet,gensigbkgreco,(int)(Ajmin[iAj]*10),(int)(Ajmax[iAj]*10),ncent,radius));
+ c1->SaveAs(Form("cumulative_eta%d_doMC%d_%s_doIntegrate%d_doGenJet%d_kind%d_Aj%d_%d_ncent%d_r%d_dataMC.C",(int)(etadijet*10),doMC,svariable[index_var].Data(),doIntegrate,doGenJet,gensigbkgreco,(int)(Ajmin[iAj]*10),(int)(Ajmax[iAj]*10),ncent,radius));
+ c1->SaveAs(Form("cumulative_eta%d_doMC%d_%s_doIntegrate%d_doGenJet%d_kind%d_Aj%d_%d_ncent%d_r%d_dataMC.gif",(int)(etadijet*10),doMC,svariable[index_var].Data(),doIntegrate,doGenJet,gensigbkgreco,(int)(Ajmin[iAj]*10),(int)(Ajmax[iAj]*10),ncent,radius));
  
 
  TFile *outf = new TFile(Form("results_Aj%d.root",iAj),"recreate");
